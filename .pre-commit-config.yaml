@@ -9,9 +9,9 @@ repos:
         args:
           - --tf-init-args=-upgrade
           - --hook-config=--retry-once-with-cleanup=true # requires jq - cleans up broken .terraform directories
-      # - id: terraform_tflint
-      #   args:
-      #     - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl
+      - id: terraform_tflint
+        args:
+          - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl
       - id: terraform_trivy
       - id: terraform_checkov
         args:
