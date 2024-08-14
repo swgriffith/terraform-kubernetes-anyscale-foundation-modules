@@ -29,7 +29,8 @@ locals {
   private_subnets = ["172.24.20.0/24", "172.24.21.0/24", "172.24.22.0/24"]
 }
 module "eks_vpc" {
-  source = "../../../aws-anyscale-vpc"
+  #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
+  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-vpc"
 
   anyscale_vpc_name = "anyscale-tftest-eks"
   cidr_block        = "172.24.0.0/16"
@@ -43,7 +44,8 @@ locals {
 }
 
 module "eks_securitygroup" {
-  source = "../../../aws-anyscale-securitygroups"
+  #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
+  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-securitygroups"
 
   vpc_id = module.eks_vpc.vpc_id
 
@@ -55,7 +57,8 @@ module "eks_securitygroup" {
 }
 
 module "eks_iam_roles" {
-  source = "../../../aws-anyscale-iam"
+  #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
+  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-iam"
 
   module_enabled                       = true
   create_anyscale_access_role          = false
@@ -70,8 +73,44 @@ module "eks_iam_roles" {
   tags = local.full_tags
 }
 
+locals {
+  coredns_config = jsonencode({
+    affinity = {
+      nodeAffinity = {
+        requiredDuringSchedulingIgnoredDuringExecution = {
+          nodeSelectorTerms = [
+            {
+              matchExpressions = [
+                {
+                  key      = "node-type"
+                  operator = "In"
+                  values   = ["management"]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    nodeSelector = {
+      "node-type" = "management"
+    },
+    tolerations = [
+      {
+        key      = "CriticalAddonsOnly"
+        operator = "Exists"
+      },
+      {
+        effect = "NoSchedule"
+        key    = "node-role.kubernetes.io/control-plane"
+      }
+    ],
+    replicaCount = 2
+  })
+}
+
 module "eks_cluster" {
-  source = "../../../aws-anyscale-eks-cluster"
+  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-cluster"
 
   module_enabled = true
 
@@ -79,6 +118,27 @@ module "eks_cluster" {
   anyscale_subnet_count      = local.anyscale_subnet_count
   anyscale_security_group_id = module.eks_securitygroup.security_group_id
   eks_role_arn               = module.eks_iam_roles.iam_anyscale_eks_cluster_role_arn
+
+  eks_addons = [
+    {
+      addon_name           = "coredns"
+      addon_version        = "v1.11.1-eksbuild.8"
+      configuration_values = local.coredns_config
+    }
+  ]
+  eks_addons_depends_on = module.all_defaults
+
+  tags = local.full_tags
+}
+
+module "eks_nodegroups" {
+  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-nodegroups"
+
+  module_enabled = true
+
+  eks_node_role_arn = module.eks_iam_roles.iam_anyscale_eks_node_role_arn
+  eks_cluster_name  = module.eks_cluster.eks_cluster_name
+  subnet_ids        = module.eks_vpc.public_subnet_ids
 
   tags = local.full_tags
 }
@@ -92,9 +152,9 @@ module "all_defaults" {
   module_enabled = true
   cloud_provider = "aws"
 
-  kubernetes_cluster_name     = module.eks_cluster.eks_cluster_name
-  kubernetes_endpoint_address = module.eks_cluster.eks_cluster_endpoint
-  kubernetes_cluster_ca_data  = module.eks_cluster.eks_cluster_ca_data
+  kubernetes_cluster_name = module.eks_cluster.eks_cluster_name
+  # kubernetes_endpoint_address = module.eks_cluster.eks_cluster_endpoint
+  # kubernetes_cluster_ca_data  = module.eks_cluster.eks_cluster_ca_data
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

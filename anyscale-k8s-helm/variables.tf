@@ -20,6 +20,19 @@ variable "cloud_provider" {
   }
 }
 
+variable "kubernetes_cluster_name" {
+  type        = string
+  description = <<-EOT
+    (Optional) The name of the Kubernetes cluster.
+
+    ex:
+    ```
+    kubernetes_cluster_name = "my-cluster"
+    ```
+  EOT
+  default     = null
+}
+
 # ------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These variables have defaults, but may be overridden.
@@ -51,44 +64,7 @@ variable "ingress_namespace" {
   default     = "ingress-nginx"
 }
 
-variable "kubernetes_cluster_name" {
-  description = <<-EOT
-    (Optional) The name of the Kubernetes cluster.
 
-    ex:
-    ```
-    kubernetes_cluster_name = "anyscale-cluster"
-    ```
-  EOT
-  type        = string
-  default     = null
-}
-
-variable "kubernetes_endpoint_address" {
-  description = <<-EOT
-    (Optional) The address of the Kubernetes API server.
-
-    ex:
-    ```
-    kubernetes_endpoint_address = "https://anyscale-cluster.eks.us-east-2.amazonaws.com"
-    ```
-  EOT
-  type        = string
-  default     = null
-}
-
-variable "kubernetes_cluster_ca_data" {
-  description = <<-EOT
-    (Optional) The base64 encoded certificate data required to communicate with the Kubernetes cluster.
-
-    ex:
-    ```
-    kubernetes_cluster_ca_data = "LS0txxxxx"
-    ```
-  EOT
-  type        = string
-  default     = null
-}
 
 # ------------------------------------------------------------------------------
 # Helm Chart Variables

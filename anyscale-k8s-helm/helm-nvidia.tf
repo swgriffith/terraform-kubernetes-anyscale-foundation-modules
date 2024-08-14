@@ -7,7 +7,7 @@ resource "helm_release" "nvidia" {
   create_namespace = true
   version          = "0.16.2"
 
-  // https://github.com/NVIDIA/k8s-device-plugin?tab=readme-ov-file#deploying-with-gpu-feature-discovery-for-automatic-node-labels
+  # https://github.com/NVIDIA/k8s-device-plugin?tab=readme-ov-file#deploying-with-gpu-feature-discovery-for-automatic-node-labels
   set {
     name  = "gfd.enabled"
     value = true
