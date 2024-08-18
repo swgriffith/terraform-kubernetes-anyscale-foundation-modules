@@ -51,20 +51,6 @@ variable "module_enabled" {
   default     = false
 }
 
-variable "ingress_namespace" {
-  type        = string
-  description = <<-EOT
-    (Optional) Namespace to place the ingress-nginx chart into.
-
-    ex:
-    ```
-    ingress_namespace = "ingress-nginx"
-    ```
-  EOT
-  default     = "ingress-nginx"
-}
-
-
 
 # ------------------------------------------------------------------------------
 # Helm Chart Variables
@@ -102,5 +88,46 @@ variable "anyscale_cluster_autoscaler_chart" {
     chart_version = "9.37.0"
     namespace     = "kube-system"
     values        = {}
+  }
+}
+
+variable "anyscale_ingress_chart" {
+  description = <<-EOT
+    (Optional) The Helm chart to install the Cluster Ingress.
+
+    ex:
+    ```
+    anyscale_ingress_chart = {
+      name          = "anyscale-ingress"
+      respository   = "https://kubernetes.github.io/ingress-nginx"
+      chart         = "ingress-nginx"
+      chart_version = "4.11.1"
+      namespace     = "ingress-nginx"
+      values        = {
+        "some.other.config" = "value"
+      }
+    }
+    ```
+  EOT
+  type = object({
+    name          = string
+    repository    = string
+    chart         = string
+    chart_version = string
+    namespace     = string
+    values        = map(string)
+  })
+  default = {
+    name          = "anyscale-ingress"
+    repository    = "https://kubernetes.github.io/ingress-nginx"
+    chart         = "ingress-nginx"
+    chart_version = "4.11.1"
+    namespace     = "ingress-nginx"
+    values = {
+      "controller.service.type"                                                                = "LoadBalancer"
+      "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type" = "nlb"
+      "controller.allowSnippetAnnotations"                                                     = "true"
+      "controller.autoscaling.enabled"                                                         = "true"
+    }
   }
 }

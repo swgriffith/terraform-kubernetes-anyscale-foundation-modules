@@ -1,29 +1,37 @@
-resource "helm_release" "ingress" {
+# --------------------------------------------------------------------------------
+# Description: This file contains the terraform configuration to deploy the ingress controller using helm.
+# --------------------------------------------------------------------------------
+
+resource "helm_release" "nginx_ingress" {
   count = local.module_enabled ? 1 : 0
 
-  name             = "anyscale-ingress"
-  repository       = "https://kubernetes.github.io/ingress-nginx"
-  chart            = "ingress-nginx"
-  namespace        = var.ingress_namespace
-  version          = "4.11.1"
+  name             = var.anyscale_ingress_chart.name
+  repository       = var.anyscale_ingress_chart.repository
+  chart            = var.anyscale_ingress_chart.chart
+  namespace        = var.anyscale_ingress_chart.namespace
+  version          = var.anyscale_ingress_chart.chart_version
   create_namespace = true
   wait             = true
-  set {
-    name  = "controller.service.type"
-    value = "LoadBalancer"
-  }
-  set {
-    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
-    value = "nlb"
+
+  dynamic "set" {
+    for_each = var.anyscale_ingress_chart.values
+    content {
+      name  = set.key
+      value = set.value
+    }
   }
 
-  set {
-    name  = "controller.allowSnippetAnnotations"
-    value = true
-  }
+  depends_on = [
+    time_sleep.wait_helm_termination
+  ]
+}
 
-  set {
-    name  = "controller.autoscaling.enabled"
-    value = true
+
+
+data "kubernetes_service" "nginx_ingress" {
+  count = local.module_enabled ? 1 : 0
+  metadata {
+    name      = "${helm_release.nginx_ingress[0].name}-${helm_release.nginx_ingress[0].chart}-controller"
+    namespace = var.anyscale_ingress_chart.namespace
   }
 }

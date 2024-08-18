@@ -153,8 +153,6 @@ module "all_defaults" {
   cloud_provider = "aws"
 
   kubernetes_cluster_name = module.eks_cluster.eks_cluster_name
-  # kubernetes_endpoint_address = module.eks_cluster.eks_cluster_endpoint
-  # kubernetes_cluster_ca_data  = module.eks_cluster.eks_cluster_ca_data
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

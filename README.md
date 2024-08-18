@@ -46,6 +46,7 @@ We use GitHub [Issues] to track community reported issues and missing features.
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.0 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.0 |
+| <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.12 |
 
 ## Providers
 
