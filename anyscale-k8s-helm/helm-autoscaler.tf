@@ -2,7 +2,7 @@
 #   https://github.com/kubernetes/autoscaler
 
 resource "helm_release" "anyscale_cluster_autoscaler" {
-  count = local.module_enabled && var.cloud_provider == "aws" ? 1 : 0
+  count = local.module_enabled && var.cloud_provider == "aws" && var.anyscale_cluster_autoscaler_chart.enabled ? 1 : 0
 
   name             = var.anyscale_cluster_autoscaler_chart.name
   repository       = var.anyscale_cluster_autoscaler_chart.repository

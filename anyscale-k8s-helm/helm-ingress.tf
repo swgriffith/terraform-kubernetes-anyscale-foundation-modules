@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------------
 
 resource "helm_release" "nginx_ingress" {
-  count = local.module_enabled ? 1 : 0
+  count = local.module_enabled && var.anyscale_ingress_chart.enabled ? 1 : 0
 
   name             = var.anyscale_ingress_chart.name
   repository       = var.anyscale_ingress_chart.repository

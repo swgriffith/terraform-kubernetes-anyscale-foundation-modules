@@ -62,6 +62,7 @@ variable "anyscale_cluster_autoscaler_chart" {
     ex:
     ```
     anyscale_cluster_autoscaler_chart = {
+      enabled       = true
       name          = "cluster-autoscaler"
       respository   = "https://kubernetes.github.io/autoscaler"
       chart         = "cluster-autoscaler"
@@ -74,6 +75,7 @@ variable "anyscale_cluster_autoscaler_chart" {
     ```
   EOT
   type = object({
+    enabled       = bool
     name          = string
     repository    = string
     chart         = string
@@ -82,6 +84,7 @@ variable "anyscale_cluster_autoscaler_chart" {
     values        = map(string)
   })
   default = {
+    enabled       = true
     name          = "anyscale-cluster-autoscaler"
     repository    = "https://kubernetes.github.io/autoscaler"
     chart         = "cluster-autoscaler"
@@ -98,6 +101,7 @@ variable "anyscale_ingress_chart" {
     ex:
     ```
     anyscale_ingress_chart = {
+      enabled       = true
       name          = "anyscale-ingress"
       respository   = "https://kubernetes.github.io/ingress-nginx"
       chart         = "ingress-nginx"
@@ -110,6 +114,7 @@ variable "anyscale_ingress_chart" {
     ```
   EOT
   type = object({
+    enabled       = bool
     name          = string
     repository    = string
     chart         = string
@@ -118,6 +123,7 @@ variable "anyscale_ingress_chart" {
     values        = map(string)
   })
   default = {
+    enabled       = true
     name          = "anyscale-ingress"
     repository    = "https://kubernetes.github.io/ingress-nginx"
     chart         = "ingress-nginx"
@@ -128,6 +134,49 @@ variable "anyscale_ingress_chart" {
       "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type" = "nlb"
       "controller.allowSnippetAnnotations"                                                     = "true"
       "controller.autoscaling.enabled"                                                         = "true"
+    }
+  }
+}
+
+variable "anyscale_nvidia_device_plugin_chart" {
+  description = <<-EOT
+    (Optional) The Helm chart to install the NVIDIA Device Plugin.
+
+    Valid settings can be found in the [nvidia documentation](https://github.com/NVIDIA/k8s-device-plugin?tab=readme-ov-file#deploying-with-gpu-feature-discovery-for-automatic-node-labels)
+
+    ex:
+    ```
+    anyscale_nvidia_device_plugin_chart = {
+      enabled       = true
+      name          = "nvidia-device-plugin"
+      respository   = "https://nvidia.github.io/k8s-device-plugin"
+      chart         = "nvidia-device-plugin"
+      chart_version = "0.16.2"
+      namespace     = "nvidia-device-plugin"
+      values        = {
+        "some.other.config" = "value"
+      }
+    }
+    ```
+  EOT
+  type = object({
+    enabled       = bool
+    name          = string
+    repository    = string
+    chart         = string
+    chart_version = string
+    namespace     = string
+    values        = map(string)
+  })
+  default = {
+    enabled       = true
+    name          = "anyscale-nvidia-device-plugin"
+    repository    = "https://nvidia.github.io/k8s-device-plugin"
+    chart         = "nvidia-device-plugin"
+    chart_version = "0.16.2"
+    namespace     = "nvidia-device-plugin"
+    values = {
+      "gfd.enabled" = "true"
     }
   }
 }
