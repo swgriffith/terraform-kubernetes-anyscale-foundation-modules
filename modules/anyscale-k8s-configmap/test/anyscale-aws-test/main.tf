@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------------------------------------------------
-# CREATE Anyscale K8s Helm Resources
+# CREATE Anyscale K8s ConfigMap Resources
 #   This template creates EKS resources for Anyscale
 #   Requires:
 #     - VPC

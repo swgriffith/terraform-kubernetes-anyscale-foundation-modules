@@ -6,6 +6,7 @@
 #     - Security Group
 #     - IAM Roles
 #     - EKS Cluster
+#     - EKS Nodegroups
 # ---------------------------------------------------------------------------------------------------------------------
 locals {
   # azs = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -30,7 +31,7 @@ locals {
 }
 module "eks_vpc" {
   #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-vpc"
+  source = "../../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-vpc"
 
   anyscale_vpc_name = "tftest-k8s-helm"
   cidr_block        = "172.24.0.0/16"
@@ -45,7 +46,7 @@ locals {
 
 module "eks_securitygroup" {
   #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-securitygroups"
+  source = "../../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-securitygroups"
 
   vpc_id = module.eks_vpc.vpc_id
 
@@ -58,7 +59,7 @@ module "eks_securitygroup" {
 
 module "eks_iam_roles" {
   #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-iam"
+  source = "../../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-iam"
 
   module_enabled                       = true
   create_anyscale_access_role          = false
@@ -110,7 +111,7 @@ locals {
 }
 
 module "eks_cluster" {
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-cluster"
+  source = "../../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-cluster"
 
   module_enabled = true
 
@@ -135,7 +136,7 @@ module "eks_cluster" {
 }
 
 module "eks_nodegroups" {
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-nodegroups"
+  source = "../../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-nodegroups"
 
   module_enabled = true
 
