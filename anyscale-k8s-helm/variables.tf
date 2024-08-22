@@ -130,10 +130,9 @@ variable "anyscale_ingress_chart" {
     chart_version = "4.11.1"
     namespace     = "ingress-nginx"
     values = {
-      "controller.service.type"                                                                = "LoadBalancer"
-      "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type" = "nlb"
-      "controller.allowSnippetAnnotations"                                                     = "true"
-      "controller.autoscaling.enabled"                                                         = "true"
+      "controller.service.type"            = "LoadBalancer"
+      "controller.allowSnippetAnnotations" = "true"
+      "controller.autoscaling.enabled"     = "true"
     }
   }
 }
@@ -178,5 +177,44 @@ variable "anyscale_nvidia_device_plugin_chart" {
     values = {
       "gfd.enabled" = "true"
     }
+  }
+}
+
+variable "anyscale_metrics_server_chart" {
+  description = <<-EOT
+    (Optional) The Helm chart to install the Metrics Server.
+
+    ex:
+    ```
+    anyscale_metrics_server_chart = {
+      enabled       = true
+      name          = "metrics-server"
+      respository   = "https://kubernetes-sigs.github.io/metrics-server/"
+      chart         = "metrics-server"
+      chart_version = "3.12.1"
+      namespace     = "metrics-server"
+      values        = {
+        "some.other.config" = "value"
+      }
+    }
+    ```
+  EOT
+  type = object({
+    enabled       = bool
+    name          = string
+    repository    = string
+    chart         = string
+    chart_version = string
+    namespace     = string
+    values        = map(string)
+  })
+  default = {
+    enabled       = true
+    name          = "metrics-server"
+    repository    = "https://kubernetes-sigs.github.io/metrics-server/"
+    chart         = "metrics-server"
+    chart_version = "3.12.1"
+    namespace     = "metrics-server"
+    values        = {}
   }
 }

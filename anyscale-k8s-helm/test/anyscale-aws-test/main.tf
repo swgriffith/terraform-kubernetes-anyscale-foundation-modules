@@ -126,9 +126,16 @@ module "eks_cluster" {
       configuration_values = local.coredns_config
     }
   ]
-  eks_addons_depends_on = module.all_defaults
+  eks_addons_depends_on = module.eks_nodegroups
+
+  # create_eks_ingress_nlb      = true
+  # eks_ingress_nlb_vpc_id      = module.eks_vpc.vpc_id
+  # eks_ingress_nlb_subnet_ids  = module.eks_vpc.public_subnet_ids
+  # eks_ingress_security_groups = [module.eks_securitygroup.security_group_id]
 
   tags = local.full_tags
+
+  depends_on = [module.eks_iam_roles, module.eks_vpc, module.eks_securitygroup]
 }
 
 module "eks_nodegroups" {
@@ -153,6 +160,8 @@ module "all_defaults" {
   cloud_provider = "aws"
 
   kubernetes_cluster_name = module.eks_cluster.eks_cluster_name
+
+  depends_on = [module.eks_nodegroups]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
