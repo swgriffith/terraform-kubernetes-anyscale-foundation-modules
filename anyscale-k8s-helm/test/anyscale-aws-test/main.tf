@@ -32,7 +32,7 @@ module "eks_vpc" {
   #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
   source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-vpc"
 
-  anyscale_vpc_name = "anyscale-tftest-eks"
+  anyscale_vpc_name = "tftest-k8s-helm"
   cidr_block        = "172.24.0.0/16"
 
   public_subnets  = local.public_subnets
@@ -49,7 +49,7 @@ module "eks_securitygroup" {
 
   vpc_id = module.eks_vpc.vpc_id
 
-  security_group_name_prefix = "anyscale-tftest-eks-"
+  security_group_name_prefix = "tftest-k8s-helm-"
 
   ingress_with_self = [
     { rule = "all-all" }
@@ -66,9 +66,9 @@ module "eks_iam_roles" {
   create_iam_s3_policy                 = false
 
   create_anyscale_eks_cluster_role = true
-  anyscale_eks_cluster_role_name   = "anyscale-tftest-k8s-helm-cluster-role"
+  anyscale_eks_cluster_role_name   = "tftest-k8s-helm-cluster"
   create_anyscale_eks_node_role    = true
-  anyscale_eks_node_role_name      = "anyscale-tftest-k8s-helm-node-role"
+  anyscale_eks_node_role_name      = "tftest-k8s-helm-node-role"
 
   tags = local.full_tags
 }
@@ -118,7 +118,7 @@ module "eks_cluster" {
   anyscale_subnet_count      = local.anyscale_subnet_count
   anyscale_security_group_id = module.eks_securitygroup.security_group_id
   eks_role_arn               = module.eks_iam_roles.iam_anyscale_eks_cluster_role_arn
-  anyscale_eks_name          = "anyscale-tftest-k8s-helm"
+  anyscale_eks_name          = "tftest-k8s-helm"
 
   eks_addons = [
     {
