@@ -37,6 +37,19 @@ variable "kubernetes_cluster_name" {
 # OPTIONAL PARAMETERS
 # These variables have defaults, but may be overridden.
 # ------------------------------------------------------------------------------
+variable "module_enabled" {
+  description = <<-EOT
+    (Optional) Determines if this module should create resources.
+
+    If set to true, `eks_role_arn`, `anyscale_subnet_ids`, and `anyscale_security_group_id` must be provided.
+    ex:
+    ```
+    module_enabled = true
+    ```
+  EOT
+  type        = bool
+  default     = false
+}
 
 # ------------------
 # AWS Related

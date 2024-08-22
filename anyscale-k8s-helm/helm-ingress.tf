@@ -31,10 +31,16 @@ resource "helm_release" "nginx_ingress" {
   }
 
   dynamic "set" {
-    for_each = var.cloud_provider == "aws" ? [{
-      name  = "controller.service.annotations.service.beta.kubernetes.io/aws-load-balancer-type"
-      value = "nlb"
-    }] : []
+    for_each = var.cloud_provider == "aws" ? [
+      {
+        name  = "controller.service.annotations.service.beta.kubernetes.io/aws-load-balancer-type"
+        value = "nlb"
+      },
+      {
+        name  = "controller.service.annotations.service.beta.kubernetes.io/aws-load-balancer-name"
+        value = "anyscale-ingress-nginx"
+      }
+    ] : []
     content {
       name  = set.value.name
       value = set.value.value
@@ -43,7 +49,7 @@ resource "helm_release" "nginx_ingress" {
 
   depends_on = [
     kubernetes_namespace.ingress_nginx,
-    time_sleep.wait_helm_termination
+    time_sleep.wait_helm_termination[0]
   ]
 
 }
