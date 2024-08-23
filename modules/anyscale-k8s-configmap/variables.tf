@@ -54,20 +54,22 @@ variable "module_enabled" {
 # ------------------
 # AWS Related
 # ------------------
-variable "aws_dataplane_role_arn" {
+variable "create_aws_auth_configmap" {
   description = <<-EOT
-    (Optional) The ARN of the AWS IAM role that will be used by the EKS cluster to access AWS services.
+    (Optional) Determines if the aws-auth configmap should be created.
 
-    Required if `cloud_provider` is set to `aws`.
+    Only applies if `cloud_provider` is set to `aws`.
 
     ex:
     ```
-    aws_dataplane_role_arn = "arn:aws:iam::123456789012:role/my-eks-dataplane-role"
+    create_aws_auth_configmap = true
     ```
   EOT
-  type        = string
-  default     = null
+  type        = bool
+  default     = false
 }
+
+
 variable "aws_controlplane_role_arn" {
   description = <<-EOT
     (Optional) The ARN of the AWS IAM role that will be used by the EKS cluster to access AWS services.
@@ -77,6 +79,20 @@ variable "aws_controlplane_role_arn" {
     ex:
     ```
     aws_controlplane_role_arn = "arn:aws:iam::123456789012:role/my-eks-controlplane-role"
+    ```
+  EOT
+  type        = string
+  default     = null
+}
+variable "aws_dataplane_role_arn" {
+  description = <<-EOT
+    (Optional) The ARN of the AWS IAM role that will be used by the EKS cluster to access AWS services.
+
+    Required if `cloud_provider` is set to `aws`.
+
+    ex:
+    ```
+    aws_dataplane_role_arn = "arn:aws:iam::123456789012:role/my-eks-dataplane-role"
     ```
   EOT
   type        = string

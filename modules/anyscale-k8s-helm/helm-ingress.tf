@@ -52,6 +52,8 @@ resource "helm_release" "nginx_ingress" {
     time_sleep.wait_helm_termination[0]
   ]
 
+  timeout = 600
+
 }
 
 

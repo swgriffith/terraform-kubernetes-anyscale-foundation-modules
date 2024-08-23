@@ -8,4 +8,12 @@ resource "helm_release" "feature_metrics_server" {
   version    = var.anyscale_metrics_server_chart.chart_version
 
   create_namespace = true
+
+  dynamic "set" {
+    for_each = var.anyscale_metrics_server_chart.values
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
 }

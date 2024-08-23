@@ -17,9 +17,17 @@ resource "helm_release" "anyscale_cluster_autoscaler" {
     value = var.kubernetes_cluster_name
   }
 
-  set {
-    name  = "awsRegion"
-    value = data.aws_region.current[0].name
+  dynamic "set" {
+    for_each = var.cloud_provider == "aws" ? [
+      {
+        name  = "awsRegion"
+        value = data.aws_region.current[0].name
+      }
+    ] : []
+    content {
+      name  = set.value.name
+      value = set.value.value
+    }
   }
 
   dynamic "set" {
