@@ -1,3 +1,4 @@
+# Description: This file contains the terraform configuration to deploy the NVIDIA device plugin helm chart.
 resource "helm_release" "nvidia" {
   count      = local.module_enabled && var.anyscale_nvidia_device_plugin_chart.enabled ? 1 : 0
   name       = var.anyscale_nvidia_device_plugin_chart.name

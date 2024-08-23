@@ -184,6 +184,8 @@ variable "anyscale_metrics_server_chart" {
   description = <<-EOT
     (Optional) The Helm chart to install the Metrics Server.
 
+    Required for the Anyscale Autoscaler to function.
+
     ex:
     ```
     anyscale_metrics_server_chart = {
@@ -215,6 +217,45 @@ variable "anyscale_metrics_server_chart" {
     chart         = "metrics-server"
     chart_version = "3.12.1"
     namespace     = "metrics-server"
+    values        = {}
+  }
+}
+
+variable "anyscale_prometheus_chart" {
+  description = <<-EOT
+    (Optional) The Helm chart to install Prometheus.
+
+    ex:
+    ```
+    anyscale_prometheus_chart = {
+      enabled       = true
+      name          = "prometheus"
+      respository   = "https://prometheus-community.github.io/helm-charts"
+      chart         = "prometheus"
+      chart_version = "16.0.0"
+      namespace     = "prometheus"
+      values        = {
+        "some.other.config" = "value"
+      }
+    }
+    ```
+  EOT
+  type = object({
+    enabled       = bool
+    name          = string
+    repository    = string
+    chart         = string
+    chart_version = string
+    namespace     = string
+    values        = map(string)
+  })
+  default = {
+    enabled       = false
+    name          = "prometheus"
+    repository    = "https://prometheus-community.github.io/helm-charts"
+    chart         = "prometheus"
+    chart_version = "25.26.0"
+    namespace     = "prometheus"
     values        = {}
   }
 }

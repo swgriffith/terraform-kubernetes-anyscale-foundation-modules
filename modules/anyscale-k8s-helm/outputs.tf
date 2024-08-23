@@ -1,5 +1,5 @@
-output "nginx_ingress_lb_hostnames" {
-  description = "Hostnames of the nginx load balancer"
+output "nginx_ingress_lb_hostname" {
+  description = "Hostname of the nginx load balancer"
   value       = try(data.kubernetes_service.nginx_ingress[0].status[0].load_balancer[0].ingress[*].hostname, [])
 }
 

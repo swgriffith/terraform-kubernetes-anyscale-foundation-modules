@@ -1,3 +1,4 @@
+# Description: This file contains the terraform configuration to deploy the metrics server helm chart.
 resource "helm_release" "feature_metrics_server" {
   count = local.module_enabled && var.anyscale_metrics_server_chart.enabled ? 1 : 0
 
