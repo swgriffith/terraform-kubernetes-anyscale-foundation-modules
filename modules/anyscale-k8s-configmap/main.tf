@@ -7,10 +7,6 @@ locals {
   aws_auth_configmap_data = {
     mapRoles = yamlencode([
       {
-        rolearn = var.aws_controlplane_role_arn
-        groups  = ["system:masters"]
-      },
-      {
         rolearn  = var.aws_dataplane_role_arn
         username = "system:node:{{EC2PrivateDNSName}}"
         groups   = ["system:bootstrappers", "system:nodes"]

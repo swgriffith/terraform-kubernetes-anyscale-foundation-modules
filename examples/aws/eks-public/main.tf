@@ -72,7 +72,9 @@ module "anyscale_iam_roles" {
   module_enabled                       = true
   create_anyscale_access_role          = true
   create_cluster_node_instance_profile = false
-  create_iam_s3_policy                 = false
+
+  create_iam_s3_policy   = true
+  anyscale_s3_bucket_arn = module.anyscale_s3.s3_bucket_arn
 
   create_anyscale_eks_cluster_role = true
   anyscale_eks_cluster_role_name   = "anyscale-eks-public-cluster-role"
@@ -189,4 +191,15 @@ module "anyscale_k8s_configmap" {
   aws_dataplane_role_arn    = module.anyscale_iam_roles.iam_anyscale_eks_cluster_role_arn
 
   depends_on = [module.anyscale_eks_cluster, module.anyscale_k8s_helm]
+}
+
+module "anyscale_k8s_namespace" {
+  source = "../../../modules/anyscale-k8s-namespace"
+
+  module_enabled = true
+  cloud_provider = "aws"
+
+  kubernetes_cluster_name = module.anyscale_eks_cluster.eks_cluster_name
+
+  depends_on = [module.anyscale_eks_cluster]
 }
