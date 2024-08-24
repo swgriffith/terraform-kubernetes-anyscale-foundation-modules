@@ -1,6 +1,12 @@
 locals {
   kubernetes_zones = join(",", module.anyscale_vpc.availability_zones)
 }
+
+output "eks_cluster_name" {
+  description = "The name of the EKS cluster."
+  value       = module.anyscale_eks_cluster.eks_cluster_name
+}
+
 output "anyscale_register_command" {
   description = <<-EOF
     Anyscale register command.
@@ -17,7 +23,6 @@ output "anyscale_register_command" {
     --kubernetes-namespaces ${module.anyscale_k8s_namespace.anyscale_kubernetes_namespace_name} \
     --kubernetes-ingress-external-address ${module.anyscale_k8s_helm.nginx_ingress_lb_hostname[0]} \
     --kubernetes-zones ${local.kubernetes_zones} \
-    --kubernetes-dataplane-identity ${module.anyscale_iam_roles.iam_anyscale_eks_cluster_role_arn} \
-    --functional-verify workspace
+    --kubernetes-dataplane-identity ${module.anyscale_iam_roles.iam_anyscale_eks_node_role_arn}
   EOT
 }

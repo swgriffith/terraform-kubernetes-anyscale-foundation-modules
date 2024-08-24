@@ -56,3 +56,28 @@ variable "tags" {
     "environment" : "test"
   }
 }
+
+variable "anyscale_trusted_role_arns" {
+  description = <<-EOT
+    (Optional) A list of ARNs of IAM roles that are trusted by the Anyscale IAM role.
+
+    Including here to override for Anyscale Staging.
+  EOT
+  type        = list(string)
+  default     = []
+}
+
+variable "anyscale_s3_cors_rule" {
+  description = <<-EOT
+    (Optional) A map of CORS rules for the S3 bucket.
+
+    Including here to override for Anyscale Staging.
+  EOT
+  type        = map(any)
+  default = {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "POST", "PUT", "HEAD", "DELETE"]
+    allowed_origins = ["https://*.anyscale.com"]
+    expose_headers  = []
+  }
+}

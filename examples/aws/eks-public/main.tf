@@ -61,6 +61,7 @@ module "anyscale_s3" {
 
   anyscale_bucket_name = "anyscale-eks-public-${var.aws_region}"
   force_destroy        = true
+  cors_rule            = var.anyscale_s3_cors_rule
 
   tags = local.full_tags
 }
@@ -69,8 +70,10 @@ module "anyscale_iam_roles" {
   #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
   source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-iam"
 
-  module_enabled                       = true
+  module_enabled = true
+
   create_anyscale_access_role          = true
+  anyscale_trusted_role_arns           = var.anyscale_trusted_role_arns
   create_cluster_node_instance_profile = false
 
   create_iam_s3_policy   = true
@@ -81,6 +84,7 @@ module "anyscale_iam_roles" {
 
   create_anyscale_eks_node_role = true
   anyscale_eks_node_role_name   = "anyscale-eks-public-node-role"
+  anyscale_eks_cluster_name     = module.anyscale_eks_cluster.eks_cluster_name
 
   create_eks_ebs_csi_driver_role = true
   eks_ebs_csi_role_name          = "anyscale-eks-public-ebs-csi-role"
@@ -138,6 +142,8 @@ module "anyscale_eks_cluster" {
   eks_role_arn               = module.anyscale_iam_roles.iam_anyscale_eks_cluster_role_arn
   anyscale_eks_name          = "anyscale-eks-public"
 
+  enabled_cluster_log_types = ["api", "authenticator", "audit", "scheduler", "controllerManager"]
+
   eks_addons = [
     {
       addon_name           = "coredns"
@@ -188,7 +194,7 @@ module "anyscale_k8s_configmap" {
 
   kubernetes_cluster_name   = module.anyscale_eks_cluster.eks_cluster_name
   aws_controlplane_role_arn = module.anyscale_iam_roles.iam_anyscale_access_role_arn
-  aws_dataplane_role_arn    = module.anyscale_iam_roles.iam_anyscale_eks_cluster_role_arn
+  aws_dataplane_role_arn    = module.anyscale_iam_roles.iam_anyscale_eks_node_role_arn # This is set for testing on Anyscale Staging. Leave null for production.
 
   depends_on = [module.anyscale_eks_cluster, module.anyscale_k8s_helm]
 }

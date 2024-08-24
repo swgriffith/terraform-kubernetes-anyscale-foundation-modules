@@ -1,0 +1,20 @@
+anyscale cloud register --provider aws \
+    --name brent-k8s-test1 \
+    --region us-east-2 \
+    --compute-stack k8s \
+    --anyscale-iam-role-id arn:aws:iam::367974485317:role/anyscale-iam-role-20240823172808166700000002 \
+    --s3-bucket-id anyscale-eks-public-us-east-2 \
+    --kubernetes-namespaces anyscale-k8s \
+    --kubernetes-ingress-external-address af089bf3b892448a2a477a7f61884579-963701827.us-east-2.elb.amazonaws.com \
+    --kubernetes-zones us-east-2a,us-east-2b,us-east-2c \
+    --kubernetes-dataplane-identity arn:aws:iam::367974485317:role/anyscale-eks-public-node-role
+
+aws eks update-cubeconfig --name anyscale-eks-public --region us-east-2
+
+helm install brent01 . -n brent-k8s-test1 \
+    --values values-eks.yaml \
+    --set-string cloudDeploymentId=cldrsrc_2qg4v67n28ks8rshphge16zffk \
+    --set-string image=public.ecr.aws/v0b8w7e3/anyscale/kubernetes_manager:ci-0a427d389ffdd5039408c829e2213ad593991679 \
+    --namespace anyscale-k8s \
+    --wait \
+    --timeout 2m

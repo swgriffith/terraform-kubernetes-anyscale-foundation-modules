@@ -85,7 +85,7 @@ variable "anyscale_cluster_autoscaler_chart" {
   })
   default = {
     enabled       = true
-    name          = "anyscale-cluster-autoscaler"
+    name          = "cluster-autoscaler"
     repository    = "https://kubernetes.github.io/autoscaler"
     chart         = "cluster-autoscaler"
     chart_version = "9.37.0"
