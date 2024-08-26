@@ -173,6 +173,96 @@ module "anyscale_eks_nodegroups" {
   subnet_ids        = module.anyscale_vpc.public_subnet_ids
 
   tags = local.full_tags
+
+  eks_anyscale_node_groups = [
+    {
+      name = "anyscale-ondemand-cpu-8CPU-32GB"
+      instance_types = [
+        "m6a.2xlarge",
+        "m5a.2xlarge",
+        "m6i.2xlarge",
+        "m5.2xlarge"
+      ]
+      capacity_type = "ON_DEMAND"
+      ami_type      = "AL2_x86_64_GPU"
+      tags          = {}
+      scaling_config = {
+        desired_size = 0
+        max_size     = 50
+        min_size     = 0
+      }
+      taints = []
+    },
+
+    {
+      name = "anyscale-ondemand-cpu-16CPU-64GB"
+      instance_types = [
+        "m6a.4xlarge",
+        "m5a.4xlarge",
+        "m6i.4xlarge",
+        "m5.4xlarge",
+      ]
+      capacity_type = "ON_DEMAND"
+      ami_type      = "AL2_x86_64_GPU"
+      tags          = {}
+      scaling_config = {
+        desired_size = 0
+        max_size     = 50
+        min_size     = 0
+      }
+      taints = []
+    },
+
+    {
+      name = "anyscale-spot-cpu-16CPU-64GB"
+      instance_types = [
+        "m6a.4xlarge",
+        "m5a.4xlarge",
+        "m6i.4xlarge",
+        "m5.4xlarge",
+      ]
+      capacity_type = "SPOT"
+      ami_type      = "AL2_x86_64_GPU"
+      tags          = {}
+      scaling_config = {
+        desired_size = 0
+        max_size     = 50
+        min_size     = 0
+      }
+      taints = []
+    },
+
+    {
+      name = "anyscale-ondemand-gpu-16CPU-64GB-1xT4"
+      instance_types = [
+        "g4dn.4xlarge"
+      ]
+      capacity_type = "ON_DEMAND"
+      ami_type      = "AL2_x86_64_GPU"
+      tags          = {}
+      scaling_config = {
+        desired_size = 0
+        max_size     = 50
+        min_size     = 0
+      }
+      taints = []
+    },
+    {
+      name = "anyscale-ondemand-gpu-16CPU-64GB-1xA10G"
+      instance_types = [
+        "g5.4xlarge"
+      ]
+      capacity_type = "ON_DEMAND"
+      ami_type      = "AL2_x86_64_GPU"
+      tags          = {}
+      scaling_config = {
+        desired_size = 0
+        max_size     = 50
+        min_size     = 0
+      }
+      taints = []
+    }
+  ]
 }
 
 module "anyscale_k8s_helm" {
