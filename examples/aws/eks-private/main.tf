@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------------------------------------------------
-# Example Anyscale K8s Resources - Public Networking
+# Example Anyscale K8s Resources
 #   This template creates EKS resources for Anyscale
 #   It creates:
 #     - VPC
@@ -29,7 +29,7 @@ module "anyscale_vpc" {
   #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
   source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-vpc"
 
-  anyscale_vpc_name = "anyscale-eks-public"
+  anyscale_vpc_name = "anyscale-eks-private"
   cidr_block        = "172.24.0.0/16"
 
   public_subnets  = local.public_subnets
@@ -46,7 +46,7 @@ module "anyscale_securitygroup" {
 
   vpc_id = module.anyscale_vpc.vpc_id
 
-  security_group_name_prefix = "anyscale-eks-public-"
+  security_group_name_prefix = "anyscale-eks-private-"
 
   ingress_with_self = [
     { rule = "all-all" }
@@ -59,7 +59,7 @@ module "anyscale_s3" {
 
   module_enabled = true
 
-  anyscale_bucket_name = "anyscale-eks-public-${var.aws_region}"
+  anyscale_bucket_name = "anyscale-eks-private-${var.aws_region}"
   force_destroy        = true
   cors_rule            = var.anyscale_s3_cors_rule
 
@@ -80,14 +80,14 @@ module "anyscale_iam_roles" {
   anyscale_s3_bucket_arn = module.anyscale_s3.s3_bucket_arn
 
   create_anyscale_eks_cluster_role = true
-  anyscale_eks_cluster_role_name   = "anyscale-eks-public-cluster-role"
+  anyscale_eks_cluster_role_name   = "anyscale-eks-private-cluster-role"
 
   create_anyscale_eks_node_role = true
-  anyscale_eks_node_role_name   = "anyscale-eks-public-node-role"
+  anyscale_eks_node_role_name   = "anyscale-eks-private-node-role"
   anyscale_eks_cluster_name     = module.anyscale_eks_cluster.eks_cluster_name
 
   create_eks_ebs_csi_driver_role = true
-  eks_ebs_csi_role_name          = "anyscale-eks-public-ebs-csi-role"
+  eks_ebs_csi_role_name          = "anyscale-eks-private-ebs-csi-role"
   anyscale_eks_cluster_oidc_arn  = module.anyscale_eks_cluster.eks_cluster_oidc_provider_arn
   anyscale_eks_cluster_oidc_url  = module.anyscale_eks_cluster.eks_cluster_oidc_provider_url
 
@@ -140,7 +140,7 @@ module "anyscale_eks_cluster" {
   anyscale_subnet_count      = local.anyscale_subnet_count
   anyscale_security_group_id = module.anyscale_securitygroup.security_group_id
   eks_role_arn               = module.anyscale_iam_roles.iam_anyscale_eks_cluster_role_arn
-  anyscale_eks_name          = "anyscale-eks-public"
+  anyscale_eks_name          = "anyscale-eks-private"
 
   enabled_cluster_log_types = ["api", "authenticator", "audit", "scheduler", "controllerManager"]
 
@@ -170,7 +170,7 @@ module "anyscale_eks_nodegroups" {
 
   eks_node_role_arn = module.anyscale_iam_roles.iam_anyscale_eks_node_role_arn
   eks_cluster_name  = module.anyscale_eks_cluster.eks_cluster_name
-  subnet_ids        = module.anyscale_vpc.public_subnet_ids
+  subnet_ids        = module.anyscale_vpc.private_subnet_ids
 
   tags = local.full_tags
 

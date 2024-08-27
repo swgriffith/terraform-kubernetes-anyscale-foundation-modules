@@ -53,9 +53,9 @@ variable "tags" {
   type        = map(string)
   default = {
     "test" : true,
-    "environment" : "example"
+    "environment" : "example",
     "repo" : "terraform-kubernetes-anyscale-foundation-modules",
-    "example" : "aws/eks-public"
+    "example" : "aws/eks-private"
   }
 }
 
