@@ -126,6 +126,12 @@ module "eks_cluster" {
   depends_on = [module.eks_iam_roles, module.eks_vpc, module.eks_securitygroup]
 }
 
+module "k8s_default_namespace" {
+  source = "../../../anyscale-k8s-namespace"
+
+  module_enabled = true
+  cloud_provider = "aws"
+}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Create Resources with no optional parameters
@@ -136,9 +142,45 @@ module "all_defaults" {
   module_enabled = true
   cloud_provider = "aws"
 
-  aws_controlplane_role_arn = module.eks_iam_roles.iam_anyscale_access_role_arn
-  aws_dataplane_role_arn    = module.eks_iam_roles.iam_anyscale_eks_node_role_arn
+  anyscale_kubernetes_namespace = module.k8s_default_namespace.anyscale_kubernetes_namespace_name
+}
 
+# ---------------------------------------------------------------------------------------------------------------------
+# Create Resources with as many optional parameters as possible
+# ---------------------------------------------------------------------------------------------------------------------
+module "k8s_kitchensink_namespace" {
+  source = "../../../anyscale-k8s-namespace"
+
+  module_enabled = true
+  cloud_provider = "aws"
+
+  anyscale_kubernetes_namespace = "kitchensink"
+}
+
+module "kitchen_sink" {
+  source = "../../"
+
+  module_enabled = true
+  cloud_provider = "aws"
+
+  anyscale_kubernetes_namespace = module.k8s_kitchensink_namespace.anyscale_kubernetes_namespace_name
+
+  create_anyscale_instance_types_map = true
+  anyscale_instance_types_version    = "v1"
+  anyscale_instance_types = [
+    {
+      instanceType = "t3.small"
+      CPU          = 2
+      memory       = "4Gi"
+    },
+    {
+      instanceType     = "4CPU-16GB-1xA10"
+      CPU              = 4
+      GPU              = 1
+      memory           = "16Gi" # 16gb converted to bytes
+      accelerator_type = { "A10G" = 1 }
+    },
+  ]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -148,5 +190,8 @@ module "test_no_resources" {
   source = "../.."
 
   module_enabled = false
-  cloud_provider = "aws"
+
+  #Required variables
+  cloud_provider                = "aws"
+  anyscale_kubernetes_namespace = module.k8s_default_namespace.anyscale_kubernetes_namespace_name
 }

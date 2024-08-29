@@ -76,12 +76,12 @@ variable "anyscale_cluster_autoscaler_chart" {
   EOT
   type = object({
     enabled       = bool
-    name          = string
-    repository    = string
-    chart         = string
-    chart_version = string
-    namespace     = string
-    values        = map(string)
+    name          = optional(string)
+    repository    = optional(string)
+    chart         = optional(string)
+    chart_version = optional(string)
+    namespace     = optional(string)
+    values        = optional(map(string))
   })
   default = {
     enabled       = true
@@ -115,12 +115,12 @@ variable "anyscale_ingress_chart" {
   EOT
   type = object({
     enabled       = bool
-    name          = string
-    repository    = string
-    chart         = string
-    chart_version = string
-    namespace     = string
-    values        = map(string)
+    name          = optional(string)
+    repository    = optional(string)
+    chart         = optional(string)
+    chart_version = optional(string)
+    namespace     = optional(string)
+    values        = optional(map(string))
   })
   default = {
     enabled       = true
@@ -135,6 +135,22 @@ variable "anyscale_ingress_chart" {
       "controller.autoscaling.enabled"     = "true"
     }
   }
+}
+
+variable "anyscale_ingress_aws_nlb_internal" {
+  description = <<-EOT
+    (Optioanl) Determines if the AWS NLB should be internal.
+
+    Requires `cloud_provider` to be set to `aws`.
+    Requires `anyscale_ingress_chart` to be enabled.
+
+    ex:
+    ```
+    anyscale_ingress_aws_nlb_internal = true
+    ```
+  EOT
+  type        = bool
+  default     = false
 }
 
 variable "anyscale_nvidia_device_plugin_chart" {
@@ -160,12 +176,12 @@ variable "anyscale_nvidia_device_plugin_chart" {
   EOT
   type = object({
     enabled       = bool
-    name          = string
-    repository    = string
-    chart         = string
-    chart_version = string
-    namespace     = string
-    values        = map(string)
+    name          = optional(string)
+    repository    = optional(string)
+    chart         = optional(string)
+    chart_version = optional(string)
+    namespace     = optional(string)
+    values        = optional(map(string))
   })
   default = {
     enabled       = true
@@ -203,12 +219,12 @@ variable "anyscale_metrics_server_chart" {
   EOT
   type = object({
     enabled       = bool
-    name          = string
-    repository    = string
-    chart         = string
-    chart_version = string
-    namespace     = string
-    values        = map(string)
+    name          = optional(string)
+    repository    = optional(string)
+    chart         = optional(string)
+    chart_version = optional(string)
+    namespace     = optional(string)
+    values        = optional(map(string))
   })
   default = {
     enabled       = true
@@ -242,12 +258,12 @@ variable "anyscale_prometheus_chart" {
   EOT
   type = object({
     enabled       = bool
-    name          = string
-    repository    = string
-    chart         = string
-    chart_version = string
-    namespace     = string
-    values        = map(string)
+    name          = optional(string)
+    repository    = optional(string)
+    chart         = optional(string)
+    chart_version = optional(string)
+    namespace     = optional(string)
+    values        = optional(map(string))
   })
   default = {
     enabled       = false

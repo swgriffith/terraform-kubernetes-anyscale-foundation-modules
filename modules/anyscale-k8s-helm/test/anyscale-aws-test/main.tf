@@ -162,6 +162,46 @@ module "all_defaults" {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
+# Create Helm Resources with as many optional parameters as possible - not currently working.
+# ---------------------------------------------------------------------------------------------------------------------
+# module "kitchen_sink" {
+#   source = "../../"
+
+#   module_enabled = true
+#   cloud_provider = "aws"
+
+#   kubernetes_cluster_name = module.eks_cluster.eks_cluster_name
+
+#   anyscale_cluster_autoscaler_chart = {
+#     enabled = false
+#   }
+#   anyscale_nvidia_device_plugin_chart = {
+#     enabled = false
+#   }
+
+#   anyscale_metrics_server_chart = {
+#     enabled = false
+#   }
+
+#   anyscale_ingress_chart = {
+#     enabled       = true
+#     name          = "kitchensink-ingress"
+#     repository    = "https://kubernetes.github.io/ingress-nginx"
+#     chart         = "ingress-nginx"
+#     chart_version = "4.11.1"
+#     namespace     = "kitchensink-ingress-nginx"
+#     values = {
+#       "controller.service.type"            = "LoadBalancer"
+#       "controller.allowSnippetAnnotations" = "true"
+#       "controller.autoscaling.enabled"     = "true"
+#     }
+#   }
+#   anyscale_ingress_aws_nlb_internal = true
+
+#   depends_on = [module.eks_nodegroups]
+# }
+
+# ---------------------------------------------------------------------------------------------------------------------
 # Do not create any resources
 # ---------------------------------------------------------------------------------------------------------------------
 module "test_no_resources" {

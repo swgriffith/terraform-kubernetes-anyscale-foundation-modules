@@ -150,11 +150,19 @@ module "anyscale_eks_cluster" {
       addon_version        = "v1.11.1-eksbuild.8"
       configuration_values = local.coredns_config
     },
+    # Add EBS volume support for EKS
     {
       addon_name               = "aws-ebs-csi-driver"
       addon_version            = "v1.33.0-eksbuild.1"
       service_account_role_arn = module.anyscale_iam_roles.iam_anyscale_eks_csi_driver_role_arn
     }
+    # },
+    # # Add EFS mount
+    # {
+    #   addon_name               = "aws-efs-csi-driver"
+    #   addon_version            = "v2.0.7-eksbuild.1"
+    #   service_account_role_arn = module.anyscale_iam_roles.iam_anyscale_efs_csi_driver_role_arn
+    # }
   ]
   eks_addons_depends_on = module.anyscale_eks_nodegroups
 
@@ -273,20 +281,9 @@ module "anyscale_k8s_helm" {
 
   kubernetes_cluster_name = module.anyscale_eks_cluster.eks_cluster_name
 
+  anyscale_ingress_aws_nlb_internal = true
+
   depends_on = [module.anyscale_eks_cluster]
-}
-
-module "anyscale_k8s_configmap" {
-  source = "../../../modules/anyscale-k8s-configmap"
-
-  module_enabled = true
-  cloud_provider = "aws"
-
-  kubernetes_cluster_name   = module.anyscale_eks_cluster.eks_cluster_name
-  aws_controlplane_role_arn = module.anyscale_iam_roles.iam_anyscale_access_role_arn
-  aws_dataplane_role_arn    = module.anyscale_iam_roles.iam_anyscale_eks_node_role_arn # This is set for testing on Anyscale Staging. Leave null for production.
-
-  depends_on = [module.anyscale_eks_cluster, module.anyscale_k8s_helm]
 }
 
 module "anyscale_k8s_namespace" {
@@ -298,4 +295,15 @@ module "anyscale_k8s_namespace" {
   kubernetes_cluster_name = module.anyscale_eks_cluster.eks_cluster_name
 
   depends_on = [module.anyscale_eks_cluster]
+}
+
+module "anyscale_k8s_configmap" {
+  source = "../../../modules/anyscale-k8s-configmap"
+
+  module_enabled = true
+  cloud_provider = "aws"
+
+  anyscale_kubernetes_namespace = module.anyscale_k8s_namespace.anyscale_kubernetes_namespace_name
+
+  depends_on = [module.anyscale_eks_cluster, module.anyscale_k8s_helm]
 }

@@ -3,7 +3,11 @@
 [![AWS Provider Version][badge-tf-aws]](https://github.com/terraform-providers/terraform-provider-aws/releases)
 
 # Anyscale AWS EKS Example - Public Networking
-This example creates the resources to run Anyscale on AWS EKS with fully public networking.
+This example creates the resources to run Anyscale on AWS EKS with a public networking.
+
+## Known issues
+
+- Running `terraform destroy` can time out while deleting the ingress helm chart
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements

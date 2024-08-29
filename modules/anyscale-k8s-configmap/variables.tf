@@ -20,18 +20,18 @@ variable "cloud_provider" {
   }
 }
 
-variable "kubernetes_cluster_name" {
-  type        = string
+variable "anyscale_kubernetes_namespace" {
   description = <<-EOT
-    (Optional) The name of the Kubernetes cluster.
+    (Optional) The namespace to install the Anyscale resources.
 
     ex:
     ```
-    kubernetes_cluster_name = "my-cluster"
+    anyscale_kubernetes_namespace = "anyscale-k8s"
     ```
   EOT
-  default     = null
+  type        = string
 }
+
 
 # ------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
@@ -52,49 +52,96 @@ variable "module_enabled" {
 }
 
 # ------------------
-# AWS Related
+# Instance Types
 # ------------------
-variable "create_aws_auth_configmap" {
+variable "create_anyscale_instance_types_map" {
   description = <<-EOT
-    (Optional) Determines if the aws-auth configmap should be created.
-
-    Only applies if `cloud_provider` is set to `aws`.
+    (Optional) Determines if the instance-types configmap should be created.
 
     ex:
     ```
-    create_aws_auth_configmap = true
+    create_anyscale_instance_types_map = true
     ```
   EOT
   type        = bool
-  default     = false
+  default     = true
 }
 
-
-variable "aws_controlplane_role_arn" {
+variable "anyscale_instance_types_version" {
   description = <<-EOT
-    (Optional) The ARN of the AWS IAM role that will be used by the EKS cluster to access AWS services.
-
-    Required if `cloud_provider` is set to `aws`.
+    (Optional) The version of the instance-types configmap.
 
     ex:
     ```
-    aws_controlplane_role_arn = "arn:aws:iam::123456789012:role/my-eks-controlplane-role"
+    anyscale_instance_types_version = "v1"
     ```
   EOT
   type        = string
-  default     = null
+  default     = "v1"
 }
-variable "aws_dataplane_role_arn" {
-  description = <<-EOT
-    (Optional) The ARN of the AWS IAM role that will be used by the EKS cluster to access AWS services.
 
-    Required if `cloud_provider` is set to `aws`.
+variable "anyscale_instance_types" {
+  description = <<-EOT
+    (Optional) A list of instance types to create in the instance-types configmap.
 
     ex:
     ```
-    aws_dataplane_role_arn = "arn:aws:iam::123456789012:role/my-eks-dataplane-role"
+    anyscale_instance_types = [
+      {
+        instanceType = "8CPU-32GB"
+        CPU          = 8
+        memory       = 32Gi # 32gb
+      },
+      {
+        instanceType = "4CPU-16GB-1xA10"
+        CPU          = 4
+        GPU          = 1
+        memory       = 17179869184 # 16gb converted to bytes
+        accelerator_type = {"A10G" = 1}
+      },
+      {
+        instanceType = "8CPU-32GB-1xA10"
+        CPU          = 8
+        GPU          = 1
+        memory       = 32Gi # 32gb
+        accelerator_type = {"A10G" = 1}
+      },
+      {
+        instanceType = "8CPU-32GB-1xT4"
+        CPU          = 8
+        GPU          = 1
+        memory       = 32Gi # 32gb
+        accelerator_type = {"T4" = 1}
+      }
+    ]
     ```
   EOT
-  type        = string
-  default     = null
+  type = list(object({
+    instanceType     = string
+    CPU              = number
+    GPU              = optional(number)
+    memory           = string
+    accelerator_type = optional(map(number)) # accelerator_type should be a map of key-value pairs
+  }))
+  default = [
+    {
+      instanceType = "8CPU-32GB"
+      CPU          = 8
+      memory       = "32Gi"
+    },
+    {
+      instanceType     = "4CPU-16GB-1xA10"
+      CPU              = 4
+      GPU              = 1
+      accelerator_type = { "A10G" = 1 }
+      memory           = "16Gi"
+    },
+    {
+      instanceType     = "8CPU-32GB-1xA10"
+      CPU              = 8
+      GPU              = 1
+      accelerator_type = { "A10G" = 1 }
+      memory           = "32Gi"
+    }
+  ]
 }

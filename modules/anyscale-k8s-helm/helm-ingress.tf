@@ -33,12 +33,21 @@ resource "helm_release" "nginx_ingress" {
   dynamic "set" {
     for_each = var.cloud_provider == "aws" ? [
       {
-        name  = "controller.service.annotations.service.beta.kubernetes.io/aws-load-balancer-type"
+        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
         value = "nlb"
-      },
+      }
+    ] : []
+    content {
+      name  = set.value["name"]
+      value = set.value["value"]
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.cloud_provider == "aws" && var.anyscale_ingress_aws_nlb_internal ? [
       {
-        name  = "controller.service.annotations.service.beta.kubernetes.io/aws-load-balancer-name"
-        value = "anyscale-ingress-nginx"
+        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-internal"
+        value = "true"
       }
     ] : []
     content {
