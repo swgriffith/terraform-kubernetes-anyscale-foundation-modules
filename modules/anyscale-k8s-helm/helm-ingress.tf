@@ -35,6 +35,10 @@ resource "helm_release" "nginx_ingress" {
       {
         name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
         value = "nlb"
+      },
+      {
+        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-cross-zone-load-balancing-enabled"
+        value = "true"
       }
     ] : []
     content {
