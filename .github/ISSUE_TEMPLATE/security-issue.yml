@@ -23,9 +23,6 @@ body:
       description: "Please select which module(s) this issue impacts."
       options:
         - label: Root Anyscale Module
-        - label: aws-anyscale-efs
-        - label: aws-anyscale-iam
-        - label: aws-anyscale-s3
-        - label: aws-anyscale-s3-policy
-        - label: aws-anyscale-securitygroups
-        - label: aws-anyscale-vpc
+        - label: anyscale-k8s-configmap
+        - label: anyscale-k8s-helm
+        - label: anyscale-k8s-namespace
