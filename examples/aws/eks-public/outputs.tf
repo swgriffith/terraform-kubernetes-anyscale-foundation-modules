@@ -18,6 +18,7 @@ output "anyscale_register_command" {
     --name <CUSTOMER_DEFINED_NAME> \
     --region ${var.aws_region} \
     --compute-stack k8s \
+    --efs-id ${module.anyscale_efs.efs_id} \
     --anyscale-iam-role-id ${module.anyscale_iam_roles.iam_anyscale_access_role_arn} \
     --s3-bucket-id ${module.anyscale_s3.s3_bucket_id} \
     --kubernetes-namespaces ${module.anyscale_k8s_namespace.anyscale_kubernetes_namespace_name} \

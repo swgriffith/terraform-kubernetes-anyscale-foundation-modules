@@ -53,7 +53,6 @@ module "anyscale_securitygroup" {
   ]
 }
 
-
 module "anyscale_s3" {
   source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-s3"
 
@@ -62,6 +61,20 @@ module "anyscale_s3" {
   anyscale_bucket_name = "anyscale-eks-public-${var.aws_region}"
   force_destroy        = true
   cors_rule            = var.anyscale_s3_cors_rule
+
+  tags = local.full_tags
+}
+
+
+module "anyscale_efs" {
+  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-efs"
+
+  module_enabled = true
+
+  anyscale_efs_name             = "anyscale-eks-public-efs"
+  mount_targets_subnet_count    = local.anyscale_subnet_count
+  mount_targets_subnets         = module.anyscale_vpc.private_subnet_ids
+  associated_security_group_ids = [module.anyscale_securitygroup.security_group_id]
 
   tags = local.full_tags
 }
@@ -90,6 +103,10 @@ module "anyscale_iam_roles" {
   eks_ebs_csi_role_name          = "anyscale-eks-public-ebs-csi-role"
   anyscale_eks_cluster_oidc_arn  = module.anyscale_eks_cluster.eks_cluster_oidc_provider_arn
   anyscale_eks_cluster_oidc_url  = module.anyscale_eks_cluster.eks_cluster_oidc_provider_url
+
+  create_eks_efs_csi_driver_role = true
+  eks_efs_csi_role_name          = "anyscale-eks-public-efs-csi-role"
+  efs_file_system_arn            = module.anyscale_efs.efs_arn
 
   tags = local.full_tags
 }
@@ -154,14 +171,14 @@ module "anyscale_eks_cluster" {
     {
       addon_name               = "aws-ebs-csi-driver"
       addon_version            = "v1.33.0-eksbuild.1"
-      service_account_role_arn = module.anyscale_iam_roles.iam_anyscale_eks_csi_driver_role_arn
+      service_account_role_arn = module.anyscale_iam_roles.iam_anyscale_eks_ebs_csi_driver_role_arn
     },
     # Add EFS mount
-    # {
-    #   addon_name               = "aws-efs-csi-driver"
-    #   addon_version            = "v2.0.7-eksbuild.1"
-    #   service_account_role_arn = module.anyscale_iam_roles.iam_anyscale_efs_csi_driver_role_arn
-    # }
+    {
+      addon_name               = "aws-efs-csi-driver"
+      addon_version            = "v2.0.7-eksbuild.1"
+      service_account_role_arn = module.anyscale_iam_roles.iam_anyscale_eks_efs_csi_driver_role_arn
+    }
   ]
   eks_addons_depends_on = module.anyscale_eks_nodegroups
 

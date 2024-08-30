@@ -20,7 +20,7 @@ resource "helm_release" "nginx_ingress" {
   namespace        = kubernetes_namespace.ingress_nginx[0].metadata[0].name
   version          = var.anyscale_ingress_chart.chart_version
   create_namespace = false
-  wait             = true
+  wait             = false
 
   dynamic "set" {
     for_each = var.anyscale_ingress_chart.values
@@ -68,8 +68,6 @@ resource "helm_release" "nginx_ingress" {
   timeout = 600
 
 }
-
-
 
 data "kubernetes_service" "nginx_ingress" {
   count = local.module_enabled ? 1 : 0
