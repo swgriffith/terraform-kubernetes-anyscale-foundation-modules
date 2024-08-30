@@ -50,7 +50,7 @@ No modules.
 | <a name="input_kubernetes_persistent_volume_claim_name"></a> [kubernetes\_persistent\_volume\_claim\_name](#input\_kubernetes\_persistent\_volume\_claim\_name) | (Optional) The name of the Kubernetes persistent volume claim.<br><br>ex:<pre>kubernetes_persistent_volume_claim_name = "anyscale-nfs-claim"</pre> | `string` | `"anyscale-nfs-claim"` | no |
 | <a name="input_kubernetes_persistent_volume_name"></a> [kubernetes\_persistent\_volume\_name](#input\_kubernetes\_persistent\_volume\_name) | (Optional) The name of the Kubernetes persistent volume.<br><br>ex:<pre>kubernetes_persistent_volume_name = "anyscale-nfs"</pre> | `string` | `"anyscale-nfs"` | no |
 | <a name="input_kubernetes_persistent_volume_size"></a> [kubernetes\_persistent\_volume\_size](#input\_kubernetes\_persistent\_volume\_size) | (Optional) The size of the Kubernetes persistent volume.<br><br>When using AWS EFS, this is just a placeholder. The actual size is elastically built, making this just a placeholder<br><br>ex:<pre>kubernetes_persistent_volume_size = "20Gi"</pre> | `string` | `"20Gi"` | no |
-| <a name="input_module_enabled"></a> [module\_enabled](#input\_module\_enabled) | (Optional) Determines if this module should create resources.<br><br>If set to true, `eks_role_arn`, `anyscale_subnet_ids`, and `anyscale_security_group_id` must be provided.<br>ex:<pre>module_enabled = true</pre> | `bool` | `true` | no |
+| <a name="input_module_enabled"></a> [module\_enabled](#input\_module\_enabled) | (Optional) Determines if this module should create resources.<br><br>If set to true, `eks_role_arn`, `anyscale_subnet_ids`, and `anyscale_security_group_id` must be provided.<br>ex:<pre>module_enabled = true</pre> | `bool` | `false` | no |
 
 ## Outputs
 

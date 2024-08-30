@@ -48,7 +48,7 @@ variable "module_enabled" {
     ```
   EOT
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "kubernetes_persistent_volume_name" {
