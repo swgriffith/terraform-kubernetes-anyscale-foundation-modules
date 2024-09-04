@@ -153,11 +153,11 @@ module "anyscale_eks_cluster" {
 
   module_enabled = true
 
-  anyscale_subnet_ids        = module.anyscale_vpc.public_subnet_ids
-  anyscale_subnet_count      = local.anyscale_subnet_count
-  anyscale_security_group_id = module.anyscale_securitygroup.security_group_id
-  eks_role_arn               = module.anyscale_iam_roles.iam_anyscale_eks_cluster_role_arn
-  anyscale_eks_name          = "anyscale-eks-public"
+  anyscale_subnet_ids   = module.anyscale_vpc.public_subnet_ids
+  anyscale_subnet_count = local.anyscale_subnet_count
+  # anyscale_security_group_id = module.anyscale_securitygroup.security_group_id
+  eks_role_arn      = module.anyscale_iam_roles.iam_anyscale_eks_cluster_role_arn
+  anyscale_eks_name = "anyscale-eks-public"
 
   enabled_cluster_log_types = ["api", "authenticator", "audit", "scheduler", "controllerManager"]
 
@@ -192,6 +192,12 @@ module "anyscale_eks_nodegroups" {
 
   module_enabled = true
 
+  anyscale_security_group_id   = module.anyscale_securitygroup.security_group_id
+  kubernetes_security_group_id = module.anyscale_eks_cluster.cluster_managed_security_group_id
+  launch_template_name         = "anyscale-eks-public-launch-template"
+
+  create_eks_management_node_group = true # Used just to have pods that are available for management helm charts, not for Anyscale resources
+
   eks_node_role_arn = module.anyscale_iam_roles.iam_anyscale_eks_node_role_arn
   eks_cluster_name  = module.anyscale_eks_cluster.eks_cluster_name
   subnet_ids        = module.anyscale_vpc.private_subnet_ids
@@ -215,7 +221,13 @@ module "anyscale_eks_nodegroups" {
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "ANY",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     },
 
     {
@@ -234,7 +246,13 @@ module "anyscale_eks_nodegroups" {
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "ANY",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     },
 
     {
@@ -253,7 +271,13 @@ module "anyscale_eks_nodegroups" {
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "SPOT",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     },
 
     {
@@ -269,7 +293,18 @@ module "anyscale_eks_nodegroups" {
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "ANY",
+          effect = "NO_SCHEDULE",
+        },
+        {
+          key    = "node.anyscale.com/accelerator-type",
+          value  = "GPU",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     },
     {
       name = "anyscale-ondemand-gpu-16CPU-64GB-1xA10G"
@@ -284,7 +319,18 @@ module "anyscale_eks_nodegroups" {
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "ANY",
+          effect = "NO_SCHEDULE",
+        },
+        {
+          key    = "node.anyscale.com/accelerator-type",
+          value  = "GPU",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     }
   ]
 }
@@ -318,6 +364,28 @@ module "anyscale_k8s_configmap" {
   cloud_provider = "aws"
 
   anyscale_kubernetes_namespace = module.anyscale_k8s_namespace.anyscale_kubernetes_namespace_name
+
+  anyscale_instance_types = [
+    {
+      instanceType = "8CPU-32GB"
+      CPU          = 8
+      memory       = "32Gi"
+    },
+    {
+      instanceType     = "4CPU-16GB-1xA10"
+      CPU              = 4
+      GPU              = 1
+      accelerator_type = { "A10G" = 1 }
+      memory           = "16Gi"
+    },
+    {
+      instanceType     = "8CPU-32GB-1xA10"
+      CPU              = 8
+      GPU              = 1
+      accelerator_type = { "A10G" = 1 }
+      memory           = "32Gi"
+    }
+  ]
 
   depends_on = [module.anyscale_eks_cluster, module.anyscale_k8s_helm]
 }

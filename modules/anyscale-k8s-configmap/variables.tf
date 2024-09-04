@@ -128,20 +128,6 @@ variable "anyscale_instance_types" {
       instanceType = "8CPU-32GB"
       CPU          = 8
       memory       = "32Gi"
-    },
-    {
-      instanceType     = "4CPU-16GB-1xA10"
-      CPU              = 4
-      GPU              = 1
-      accelerator_type = { "A10G" = 1 }
-      memory           = "16Gi"
-    },
-    {
-      instanceType     = "8CPU-32GB-1xA10"
-      CPU              = 8
-      GPU              = 1
-      accelerator_type = { "A10G" = 1 }
-      memory           = "32Gi"
     }
   ]
 }

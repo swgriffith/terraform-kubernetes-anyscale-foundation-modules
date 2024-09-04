@@ -17,9 +17,8 @@ resource "kubernetes_config_map" "instance_type" {
 
   data = {
     version = var.anyscale_instance_types_version
-    "instance_types.json" = jsonencode(
-      [for instance in var.anyscale_instance_types : {
-        instanceType = instance.instanceType
+    "instance_types.yaml" = yamlencode({
+      for instance in var.anyscale_instance_types : instance.instanceType => {
         resources = merge(
           {
             CPU    = instance.CPU
@@ -28,7 +27,7 @@ resource "kubernetes_config_map" "instance_type" {
           instance.GPU != null ? { GPU = instance.GPU } : {},
           instance.accelerator_type != null ? { for key, value in instance.accelerator_type : "accelerator_type:${key}" => value } : {}
         )
-      }]
-    )
+      }
+    })
   }
 }
