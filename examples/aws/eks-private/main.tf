@@ -26,8 +26,9 @@ locals {
   private_subnets = ["172.24.20.0/24", "172.24.21.0/24", "172.24.22.0/24"]
 }
 module "anyscale_vpc" {
-  #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-vpc"
+  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
+  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
+  source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-vpc"
 
   anyscale_vpc_name = "anyscale-eks-private"
   cidr_block        = "172.24.0.0/16"
@@ -41,8 +42,9 @@ locals {
 }
 
 module "anyscale_securitygroup" {
-  #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-securitygroups"
+  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
+  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
+  source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-securitygroups"
 
   vpc_id = module.anyscale_vpc.vpc_id
 
@@ -54,7 +56,9 @@ module "anyscale_securitygroup" {
 }
 
 module "anyscale_s3" {
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-s3"
+  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
+  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
+  source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-s3"
 
   module_enabled = true
 
@@ -67,7 +71,9 @@ module "anyscale_s3" {
 
 
 module "anyscale_efs" {
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-efs"
+  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
+  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
+  source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-efs"
 
   module_enabled = true
 
@@ -79,9 +85,11 @@ module "anyscale_efs" {
   tags = local.full_tags
 }
 
+#trivy:ignore:avd-aws-0342 trivy:ignore:avd-aws-0342
 module "anyscale_iam_roles" {
-  #checkov:skip=CKV_TF_1: Test code should use the latest version of the module
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-iam"
+  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
+  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
+  source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-iam"
 
   module_enabled = true
 
@@ -149,7 +157,9 @@ locals {
 }
 
 module "anyscale_eks_cluster" {
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-cluster"
+  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
+  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
+  source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-eks-cluster"
 
   module_enabled = true
 
@@ -182,7 +192,9 @@ module "anyscale_eks_cluster" {
 }
 
 module "anyscale_eks_nodegroups" {
-  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-nodegroups"
+  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
+  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
+  source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-eks-nodegroups"
 
   module_enabled = true
 
