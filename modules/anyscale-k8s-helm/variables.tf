@@ -52,6 +52,52 @@ variable "module_enabled" {
 }
 
 
+# variable "anyscale_node_tolerations" {
+#   description = <<-EOT
+#     (Optional) List of tolerations to apply to helm charts that need to run on Anyscale Nodes.
+
+#     ex:
+#     ```
+#     anyscale_node_tolerations = [
+#       {
+#         key      = "node.anyscale.com/capacity-type"
+#         operator = "Equal"
+#         value    = "ANY"
+#         effect   = "NoSchedule"
+#       },
+#       {
+#         key      = "node.anyscale.com/accelerator-type"
+#         operator = "Equal"
+#         value    = "GPU"
+#         effect   = "NoSchedule"
+#       }
+#     ]
+#     ```
+#   EOT
+#   type = list(
+#     object({
+#       key      = string
+#       operator = string
+#       value    = string
+#       effect   = string
+#     })
+#   )
+#   default = [
+#     {
+#       key      = "node.anyscale.com/capacity-type"
+#       operator = "Equal"
+#       value    = "ANY"
+#       effect   = "NoSchedule"
+#     },
+#     {
+#       key      = "node.anyscale.com/accelerator-type"
+#       operator = "Equal"
+#       value    = "GPU"
+#       effect   = "NoSchedule"
+#     }
+#   ]
+# }
+
 # ------------------------------------------------------------------------------
 # Helm Chart Variables
 # ------------------------------------------------------------------------------
@@ -191,7 +237,43 @@ variable "anyscale_nvidia_device_plugin_chart" {
     chart_version = "0.16.2"
     namespace     = "nvidia-device-plugin"
     values = {
-      "gfd.enabled" = "true"
+      "gfd.enabled"       = "true",
+      "priorityClassName" = "system-node-critical"
+
+      "nfd.worker.tolerations[0].key"      = "node-role.kubernetes.io/master"
+      "nfd.worker.tolerations[0].operator" = "Equal"
+      "nfd.worker.tolerations[0].value"    = ""
+      "nfd.worker.tolerations[0].effect"   = "NoSchedule"
+
+      "nfd.worker.tolerations[1].key"      = "nvidia.com/gpu"
+      "nfd.worker.tolerations[1].operator" = "Equal"
+      "nfd.worker.tolerations[1].value"    = "present"
+      "nfd.worker.tolerations[1].effect"   = "NoSchedule"
+
+      "nfd.worker.tolerations[2].key"      = "node.anyscale.com/accelerator-type"
+      "nfd.worker.tolerations[2].operator" = "Equal"
+      "nfd.worker.tolerations[2].value"    = "GPU"
+      "nfd.worker.tolerations[2].effect"   = "NoSchedule"
+
+      "nfd.worker.tolerations[3].key"      = "node.anyscale.com/capacity-type"
+      "nfd.worker.tolerations[3].operator" = "Equal"
+      "nfd.worker.tolerations[3].value"    = "ANY"
+      "nfd.worker.tolerations[3].effect"   = "NoSchedule"
+
+      "tolerations[0].key"      = "nvidia.com/gpu"
+      "tolerations[0].operator" = "Equal"
+      "tolerations[0].value"    = "present"
+      "tolerations[0].effect"   = "NoSchedule"
+
+      "tolerations[1].key"      = "node.anyscale.com/accelerator-type"
+      "tolerations[1].operator" = "Equal"
+      "tolerations[1].value"    = "GPU"
+      "tolerations[1].effect"   = "NoSchedule"
+
+      "tolerations[2].key"      = "node.anyscale.com/capacity-type"
+      "tolerations[2].operator" = "Equal"
+      "tolerations[2].value"    = "ANY"
+      "tolerations[2].effect"   = "NoSchedule"
     }
   }
 }

@@ -53,7 +53,6 @@ module "anyscale_securitygroup" {
   ]
 }
 
-
 module "anyscale_s3" {
   source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-s3"
 
@@ -62,6 +61,20 @@ module "anyscale_s3" {
   anyscale_bucket_name = "anyscale-eks-private-${var.aws_region}"
   force_destroy        = true
   cors_rule            = var.anyscale_s3_cors_rule
+
+  tags = local.full_tags
+}
+
+
+module "anyscale_efs" {
+  source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-efs"
+
+  module_enabled = true
+
+  anyscale_efs_name             = "anyscale-eks-private-efs"
+  mount_targets_subnet_count    = local.anyscale_subnet_count
+  mount_targets_subnets         = module.anyscale_vpc.private_subnet_ids
+  associated_security_group_ids = [module.anyscale_securitygroup.security_group_id]
 
   tags = local.full_tags
 }
@@ -90,6 +103,10 @@ module "anyscale_iam_roles" {
   eks_ebs_csi_role_name          = "anyscale-eks-private-ebs-csi-role"
   anyscale_eks_cluster_oidc_arn  = module.anyscale_eks_cluster.eks_cluster_oidc_provider_arn
   anyscale_eks_cluster_oidc_url  = module.anyscale_eks_cluster.eks_cluster_oidc_provider_url
+
+  create_eks_efs_csi_driver_role = false
+  eks_efs_csi_role_name          = "anyscale-eks-private-efs-csi-role"
+  efs_file_system_arn            = module.anyscale_efs.efs_arn
 
   tags = local.full_tags
 }
@@ -136,7 +153,7 @@ module "anyscale_eks_cluster" {
 
   module_enabled = true
 
-  anyscale_subnet_ids        = module.anyscale_vpc.public_subnet_ids
+  anyscale_subnet_ids        = module.anyscale_vpc.private_subnet_ids
   anyscale_subnet_count      = local.anyscale_subnet_count
   anyscale_security_group_id = module.anyscale_securitygroup.security_group_id
   eks_role_arn               = module.anyscale_iam_roles.iam_anyscale_eks_cluster_role_arn
@@ -154,15 +171,8 @@ module "anyscale_eks_cluster" {
     {
       addon_name               = "aws-ebs-csi-driver"
       addon_version            = "v1.33.0-eksbuild.1"
-      service_account_role_arn = module.anyscale_iam_roles.iam_anyscale_eks_csi_driver_role_arn
+      service_account_role_arn = module.anyscale_iam_roles.iam_anyscale_eks_ebs_csi_driver_role_arn
     }
-    # },
-    # # Add EFS mount
-    # {
-    #   addon_name               = "aws-efs-csi-driver"
-    #   addon_version            = "v2.0.7-eksbuild.1"
-    #   service_account_role_arn = module.anyscale_iam_roles.iam_anyscale_efs_csi_driver_role_arn
-    # }
   ]
   eks_addons_depends_on = module.anyscale_eks_nodegroups
 
@@ -175,6 +185,12 @@ module "anyscale_eks_nodegroups" {
   source = "../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-nodegroups"
 
   module_enabled = true
+
+  anyscale_security_group_id   = module.anyscale_securitygroup.security_group_id
+  kubernetes_security_group_id = module.anyscale_eks_cluster.cluster_managed_security_group_id
+  launch_template_name         = "anyscale-eks-private-launch-template"
+
+  create_eks_management_node_group = true # Used just to have pods that are available for management helm charts, not for Anyscale resources
 
   eks_node_role_arn = module.anyscale_iam_roles.iam_anyscale_eks_node_role_arn
   eks_cluster_name  = module.anyscale_eks_cluster.eks_cluster_name
@@ -195,11 +211,17 @@ module "anyscale_eks_nodegroups" {
       ami_type      = "AL2_x86_64_GPU"
       tags          = {}
       scaling_config = {
-        desired_size = 0
+        desired_size = 1 # Settng to 1 to prime the autoscaler cache with the instance types and GPU availability
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "ANY",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     },
 
     {
@@ -214,11 +236,17 @@ module "anyscale_eks_nodegroups" {
       ami_type      = "AL2_x86_64_GPU"
       tags          = {}
       scaling_config = {
-        desired_size = 0
+        desired_size = 1 # Settng to 1 to prime the autoscaler cache with the instance types and GPU availability
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "ANY",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     },
 
     {
@@ -237,7 +265,13 @@ module "anyscale_eks_nodegroups" {
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "SPOT",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     },
 
     {
@@ -247,13 +281,31 @@ module "anyscale_eks_nodegroups" {
       ]
       capacity_type = "ON_DEMAND"
       ami_type      = "AL2_x86_64_GPU"
-      tags          = {}
+      # Setting the following as labels so the Autoscaler knows where to look for GPU availability
+      labels = {}
+      tags   = {}
       scaling_config = {
         desired_size = 0
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "nvidia.com/gpu",
+          value  = "present",
+          effect = "NO_SCHEDULE",
+        },
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "ANY",
+          effect = "NO_SCHEDULE",
+        },
+        {
+          key    = "node.anyscale.com/accelerator-type",
+          value  = "GPU",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     },
     {
       name = "anyscale-ondemand-gpu-16CPU-64GB-1xA10G"
@@ -262,13 +314,71 @@ module "anyscale_eks_nodegroups" {
       ]
       capacity_type = "ON_DEMAND"
       ami_type      = "AL2_x86_64_GPU"
-      tags          = {}
+      # Setting the following as labels so the Autoscaler knows where to look for GPU availability
+      labels = {
+        "nvidia.com/gpu.product" = "NVIDIA-A10G"
+        "nvidia.com/gpu.count"   = "1"
+      }
+      tags = {}
       scaling_config = {
         desired_size = 0
         max_size     = 50
         min_size     = 0
       }
-      taints = []
+      taints = [
+        {
+          key    = "nvidia.com/gpu",
+          value  = "present",
+          effect = "NO_SCHEDULE",
+        },
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "ANY",
+          effect = "NO_SCHEDULE",
+        },
+        {
+          key    = "node.anyscale.com/accelerator-type",
+          value  = "GPU",
+          effect = "NO_SCHEDULE",
+        }
+      ]
+    },
+
+    {
+      name = "anyscale-spot-gpu-16CPU-64GB-1xA10G"
+      instance_types = [
+        "g5.4xlarge"
+      ]
+      capacity_type = "SPOT"
+      ami_type      = "AL2_x86_64_GPU"
+      # Setting the following as labels so the Autoscaler knows where to look for GPU availability
+      labels = {
+        "nvidia.com/gpu.product" = "NVIDIA-A10G"
+        "nvidia.com/gpu.count"   = "1"
+      }
+      tags = {}
+      scaling_config = {
+        desired_size = 0
+        max_size     = 50
+        min_size     = 0
+      }
+      taints = [
+        {
+          key    = "nvidia.com/gpu",
+          value  = "present",
+          effect = "NO_SCHEDULE",
+        },
+        {
+          key    = "node.anyscale.com/capacity-type",
+          value  = "ANY",
+          effect = "NO_SCHEDULE",
+        },
+        {
+          key    = "node.anyscale.com/accelerator-type",
+          value  = "GPU",
+          effect = "NO_SCHEDULE",
+        }
+      ]
     }
   ]
 }
@@ -281,9 +391,7 @@ module "anyscale_k8s_helm" {
 
   kubernetes_cluster_name = module.anyscale_eks_cluster.eks_cluster_name
 
-  anyscale_ingress_aws_nlb_internal = true
-
-  depends_on = [module.anyscale_eks_cluster]
+  depends_on = [module.anyscale_eks_nodegroups]
 }
 
 module "anyscale_k8s_namespace" {
@@ -304,6 +412,33 @@ module "anyscale_k8s_configmap" {
   cloud_provider = "aws"
 
   anyscale_kubernetes_namespace = module.anyscale_k8s_namespace.anyscale_kubernetes_namespace_name
+
+  anyscale_instance_types = [
+    {
+      instanceType = "4CPU-16GB",
+      CPU          = 4,
+      memory       = "16Gi"
+    },
+    {
+      instanceType = "8CPU-32GB"
+      CPU          = 8
+      memory       = "32Gi"
+    },
+    {
+      instanceType     = "4CPU-16GB-1xA10"
+      CPU              = 4
+      GPU              = 1
+      memory           = "16Gi"
+      accelerator_type = { "A10G" = 1 }
+    },
+    {
+      instanceType     = "4CPU-16GB-1xT4"
+      CPU              = 4
+      GPU              = 1
+      memory           = "16Gi"
+      accelerator_type = { "T4" = 1 }
+    }
+  ]
 
   depends_on = [module.anyscale_eks_cluster, module.anyscale_k8s_helm]
 }

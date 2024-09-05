@@ -11,9 +11,10 @@
 
 ## Kubernetes Resources
 
-
 To streamline long-term management and to enable customization, we've modularized the resources into the following Terraform sub-modules:
 * anyscale-k8s-helm - Required Helm Charts for Anyscale on Kubernetes
+* anyscale-k8s-configmap - A sample configmap for Anyscale. This can also be managed via the Anyscale Kubernetes Manager Helm Chart.
+* anyscale-k8s-namespace - The Namespace for Anyscale. This can also be managed via the Anyscale Kubernetes Manager Helm Chart.
 
 ### Customization
 
@@ -23,9 +24,11 @@ These modules are designed with best practices in mind, ensuring a secure, effic
 ### Examples
 The examples folder has a couple common use cases that have been tested. These include:
 * Anyscale - AWS & EKS
-  * [Build everything - use a common name for all resources](./examples/anyscale-v2-aws/)
+  * [Build everything - use a common name for all resources, public networking](./examples/aws/eks-public)
+  * [Build everything - use a common name for all resources, private networking](./examples/aws/eks-private) ** Not fully tested **
 * Anyscale - GCP & GKE
-  * [Build everything - use a common name for all resources](./examples/anyscale-v2-gcp/)
+  * [Build everything - use a common name for all resources, public networking](./examples/aws/gke-public/) ** Not Started **
+  * [Build everything - use a common name for all resources, private networking](./examples/aws/gke-private/) ** Not Started **
 
 Additional examples can be requested via an [issues] ticket.
 

@@ -16,4 +16,5 @@ resource "helm_release" "nvidia" {
       value = set.value
     }
   }
+
 }

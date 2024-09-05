@@ -5,6 +5,9 @@
 # Anyscale AWS EKS Example - Private Networking
 This example creates the resources to run Anyscale on AWS EKS with fully private networking.
 
+**NOTE**
+Not fully tested! Known to need some additional work.
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
@@ -23,6 +26,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
+| <a name="module_anyscale_efs"></a> [anyscale\_efs](#module\_anyscale\_efs) | ../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-efs | n/a |
 | <a name="module_anyscale_eks_cluster"></a> [anyscale\_eks\_cluster](#module\_anyscale\_eks\_cluster) | ../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-cluster | n/a |
 | <a name="module_anyscale_eks_nodegroups"></a> [anyscale\_eks\_nodegroups](#module\_anyscale\_eks\_nodegroups) | ../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-eks-nodegroups | n/a |
 | <a name="module_anyscale_iam_roles"></a> [anyscale\_iam\_roles](#module\_anyscale\_iam\_roles) | ../../../../terraform-aws-anyscale-cloudfoundation-modules/modules/aws-anyscale-iam | n/a |
