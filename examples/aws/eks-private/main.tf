@@ -230,7 +230,7 @@ module "anyscale_eks_nodegroups" {
       taints = [
         {
           key    = "node.anyscale.com/capacity-type",
-          value  = "ANY",
+          value  = "ON_DEMAND",
           effect = "NO_SCHEDULE",
         }
       ]
@@ -255,7 +255,7 @@ module "anyscale_eks_nodegroups" {
       taints = [
         {
           key    = "node.anyscale.com/capacity-type",
-          value  = "ANY",
+          value  = "ON_DEMAND",
           effect = "NO_SCHEDULE",
         }
       ]
@@ -309,7 +309,7 @@ module "anyscale_eks_nodegroups" {
         },
         {
           key    = "node.anyscale.com/capacity-type",
-          value  = "ANY",
+          value  = "ON_DEMAND",
           effect = "NO_SCHEDULE",
         },
         {
@@ -345,7 +345,7 @@ module "anyscale_eks_nodegroups" {
         },
         {
           key    = "node.anyscale.com/capacity-type",
-          value  = "ANY",
+          value  = "ON_DEMAND",
           effect = "NO_SCHEDULE",
         },
         {
@@ -382,7 +382,7 @@ module "anyscale_eks_nodegroups" {
         },
         {
           key    = "node.anyscale.com/capacity-type",
-          value  = "ANY",
+          value  = "SPOT",
           effect = "NO_SCHEDULE",
         },
         {
@@ -402,6 +402,9 @@ module "anyscale_k8s_helm" {
   cloud_provider = "aws"
 
   kubernetes_cluster_name = module.anyscale_eks_cluster.eks_cluster_name
+
+  # Set up NLB for internal traffic only.
+  anyscale_ingress_aws_nlb_internal = true
 
   depends_on = [module.anyscale_eks_nodegroups]
 }
