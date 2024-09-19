@@ -6,10 +6,11 @@
 This example creates the resources to run Anyscale on GCP GKE with an existing cluster
 
 ## Needs to Create:
-- filestore
-- IAM Service Accounts for ControlPlane
-- IAM Service Accounts for Dataplane (?)
-- storage bucket
+- DONE - filestore
+- DONE - IAM Service Accounts for ControlPlane
+- DONE - Firewall
+- IAM Service Accounts for Dataplane (?) (needs a cluster role for GKE)
+- DONE - storage bucket
 - namespace
 - helm charts
 - configmap
