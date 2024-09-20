@@ -5,12 +5,14 @@
 #     - Filestore
 #     - IAM Service Accounts
 #     - Firewall Policy
-#     - Helm Charts
+#     - Nginx ingress controller (Helm Chart)
 #   It expects the following to be already created:
 #     - GCP Project
-#     - GKE Cluster
-#     - GKE Node Pool
-#     - VPC
+#     - GKE cluster
+#     - VPC and Subnet
+#     - Dataplane service account: See https://docs.anyscale.com/administration/cloud-deployment/deploy-gcp-cloud
+#     - Workload Identity Provider
+#
 # ---------------------------------------------------------------------------------------------------------------------
 locals {
   full_labels = merge(tomap({
@@ -29,6 +31,8 @@ module "anyscale_cloudstorage" {
 
   anyscale_project_id = var.google_project_id
   labels              = local.full_labels
+
+  bucket_force_destroy = true
 }
 
 module "anyscale_iam" {
@@ -58,6 +62,15 @@ module "anyscale_filestore" {
   labels              = local.full_labels
 }
 
+data "google_compute_network" "existing_vpc" {
+  name = var.existing_vpc_name
+}
+
+data "google_compute_subnetwork" "exising_subnet" {
+  name   = var.existing_subnet_name
+  region = var.google_region
+}
+
 module "anyscale_firewall" {
   #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
   #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
@@ -65,9 +78,9 @@ module "anyscale_firewall" {
   module_enabled = true
 
   vpc_name = var.existing_vpc_name
-  vpc_id   = var.existing_vpc_id
+  vpc_id   = data.google_compute_network.existing_vpc.id
 
-  ingress_with_self_cidr_range = [var.existing_subnet_cidr]
+  ingress_with_self_cidr_range = [data.google_compute_subnetwork.exising_subnet.ip_cidr_range]
   ingress_from_cidr_map = [
     {
       rule        = "https-443-tcp"
@@ -80,4 +93,30 @@ module "anyscale_firewall" {
   ]
 
   anyscale_project_id = var.google_project_id
+}
+
+resource "helm_release" "ingress_nginx" {
+  name       = "ingress-nginx"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  version    = "4.11.2"
+  namespace  = "ingress-nginx"
+
+  create_namespace = true
+  wait             = false
+
+  set {
+    name  = "controller.service.type"
+    value = "LoadBalancer"
+  }
+
+  set {
+    name  = "controller.service.annotations.cloud\\.google\\.com/load-balancer-type"
+    value = "External"
+  }
+
+  set {
+    name  = "controller.service.externalTrafficPolicy"
+    value = "Local"
+  }
 }
