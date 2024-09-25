@@ -3,18 +3,29 @@
 [![Google Provider Version][badge-tf-google]](https://github.com/terraform-providers/terraform-provider-google/releases)
 
 # Anyscale GCP GKE Example - Existing Cluster
-This example creates the resources to run Anyscale on GCP GKE with an existing cluster
-**Work in progress**
 
-## Needs to Create:
-- DONE - filestore
-- DONE - IAM Service Accounts for ControlPlane
-- DONE - Firewall
-- IAM Service Accounts for Dataplane (?) (needs a cluster role for GKE)
-- DONE - storage bucket
-- namespace
-- helm charts
-- configmap
+This example creates the resources to run Anyscale on GCP GKE with an existing GKE cluster.
+
+## Known Issues on GKE
+
+- Autopilot GKE clusters are not supported.
+- Node auto-provisioning for GKE failing with GPU nodes: https://github.com/GoogleCloudPlatform/container-engine-accelerators/issues/407
+- When choosing "GPU Driver installation", select "Google-managed".
+
+## terraform.tfvars
+
+```hcl
+anyscale_deploy_env = "..."
+anyscale_org_id     = "..." # Troubleshooting Org Id
+
+google_region     = "..."
+google_project_id = "..."
+existing_vpc_name            = "..."
+existing_subnet_name         = "..."
+customer_ingress_cidr_ranges = "0.0.0.0/0"
+gke_endpoint       = "..."
+gke_ca_certificate = "..."
+```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -28,7 +39,10 @@ This example creates the resources to run Anyscale on GCP GKE with an existing c
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_google"></a> [google](#provider\_google) | 5.44.1 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | 2.15.0 |
 
 ## Modules
 
@@ -41,7 +55,12 @@ No providers.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [helm_release.ingress_nginx](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [google_client_config.provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/client_config) | data source |
+| [google_compute_network.existing_vpc](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) | data source |
+| [google_compute_subnetwork.exising_subnet](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
 
 ## Inputs
 
@@ -49,14 +68,15 @@ No resources.
 |------|-------------|------|---------|:--------:|
 | <a name="input_anyscale_org_id"></a> [anyscale\_org\_id](#input\_anyscale\_org\_id) | (Required) Anyscale Organization ID | `string` | n/a | yes |
 | <a name="input_customer_ingress_cidr_ranges"></a> [customer\_ingress\_cidr\_ranges](#input\_customer\_ingress\_cidr\_ranges) | The IPv4 CIDR blocks that allows access Anyscale clusters.<br>These are added to the firewall and allows port 443 (https) and 22 (ssh) access.<br>ex: `52.1.1.23/32,10.1.0.0/16'<br>` | `string` | n/a | yes |
-| <a name="input_existing_subnet_cidr"></a> [existing\_subnet\_cidr](#input\_existing\_subnet\_cidr) | The CIDR range of the existing subnet | `string` | n/a | yes |
-| <a name="input_existing_vpc_id"></a> [existing\_vpc\_id](#input\_existing\_vpc\_id) | The ID of the existing VPC | `string` | n/a | yes |
+| <a name="input_existing_subnet_name"></a> [existing\_subnet\_name](#input\_existing\_subnet\_name) | The name of the existing Subnet | `string` | n/a | yes |
 | <a name="input_existing_vpc_name"></a> [existing\_vpc\_name](#input\_existing\_vpc\_name) | The name of the existing VPC | `string` | n/a | yes |
+| <a name="input_gke_ca_certificate"></a> [gke\_ca\_certificate](#input\_gke\_ca\_certificate) | Base64 encoded PEM certificate for the cluster | `string` | n/a | yes |
+| <a name="input_gke_endpoint"></a> [gke\_endpoint](#input\_gke\_endpoint) | The endpoint for the GKE cluster | `string` | n/a | yes |
 | <a name="input_google_project_id"></a> [google\_project\_id](#input\_google\_project\_id) | ID of the Project to put these resources in | `string` | n/a | yes |
 | <a name="input_google_region"></a> [google\_region](#input\_google\_region) | The Google region in which all resources will be created. | `string` | n/a | yes |
 | <a name="input_anyscale_cloud_id"></a> [anyscale\_cloud\_id](#input\_anyscale\_cloud\_id) | (Optional) Anyscale Cloud ID | `string` | `null` | no |
 | <a name="input_anyscale_deploy_env"></a> [anyscale\_deploy\_env](#input\_anyscale\_deploy\_env) | (Optional) Anyscale deploy environment. Used in resource names and tags.<br><br>ex:<pre>anyscale_deploy_env = "production"</pre> | `string` | `"production"` | no |
-| <a name="input_labels"></a> [labels](#input\_labels) | (Optional) A map of labels to all resources that accept labels. | `map(string)` | <pre>{<br>  "environment": "test",<br>  "test": true<br>}</pre> | no |
+| <a name="input_labels"></a> [labels](#input\_labels) | (Optional) A map of labels to all resources that accept labels. | `map(string)` | <pre>{<br>  "environment": "test"<br>}</pre> | no |
 
 ## Outputs
 

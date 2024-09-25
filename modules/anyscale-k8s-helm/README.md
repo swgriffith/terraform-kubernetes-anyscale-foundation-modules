@@ -22,10 +22,10 @@ This module creates Kubernetes helm charts for Anyscale applications and workloa
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.63.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.68.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | 2.15.0 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.32.0 |
-| <a name="provider_time"></a> [time](#provider\_time) | 0.12.0 |
+| <a name="provider_time"></a> [time](#provider\_time) | 0.12.1 |
 
 ## Modules
 
