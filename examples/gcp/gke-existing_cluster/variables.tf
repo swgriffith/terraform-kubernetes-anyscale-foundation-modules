@@ -58,6 +58,19 @@ variable "existing_subnet_cidr" {
   type        = string
 }
 
+# -----------------
+# GKE Cluster
+# -----------------
+variable "existing_gke_cluster_name" {
+  description = "The name of the existing GKE cluster"
+  type        = string
+}
+
+variable "existing_gke_cluster_region" {
+  description = "The region of the existing GKE cluster"
+  type        = string
+}
+
 
 # ------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
@@ -105,4 +118,10 @@ variable "labels" {
     "test" : true,
     "environment" : "test"
   }
+}
+
+variable "anyscale_k8s_namespace" {
+  description = "The Anyscale namespace to deploy the workload"
+  type        = string
+  default     = "anyscale-k8s"
 }

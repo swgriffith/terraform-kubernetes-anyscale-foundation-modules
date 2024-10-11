@@ -1,8 +1,10 @@
 # Description: This file contains the terraform configuration to deploy the autoscaler helm chart.
 #   https://github.com/kubernetes/autoscaler
-
+locals {
+  helm_autoscaler_enabled = local.module_enabled && var.cloud_provider == "aws" && var.anyscale_cluster_autoscaler_chart.enabled
+}
 resource "helm_release" "anyscale_cluster_autoscaler" {
-  count = local.module_enabled && var.cloud_provider == "aws" && var.anyscale_cluster_autoscaler_chart.enabled ? 1 : 0
+  count = local.helm_autoscaler_enabled ? 1 : 0
 
   name             = var.anyscale_cluster_autoscaler_chart.name
   repository       = var.anyscale_cluster_autoscaler_chart.repository
@@ -18,10 +20,10 @@ resource "helm_release" "anyscale_cluster_autoscaler" {
   }
 
   dynamic "set" {
-    for_each = var.cloud_provider == "aws" ? [
+    for_each = local.helm_autoscaler_enabled ? [
       {
         name  = "awsRegion"
-        value = data.aws_region.current[0].name
+        value = var.eks_cluster_region
       }
     ] : []
     content {
@@ -31,7 +33,7 @@ resource "helm_release" "anyscale_cluster_autoscaler" {
   }
 
   dynamic "set" {
-    for_each = var.anyscale_cluster_autoscaler_chart.values
+    for_each = local.helm_autoscaler_enabled ? var.anyscale_cluster_autoscaler_chart.values : {}
     content {
       name  = set.key
       value = set.value
