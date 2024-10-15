@@ -101,6 +101,18 @@ variable "module_enabled" {
 # ------------------------------------------------------------------------------
 # Helm Chart Variables
 # ------------------------------------------------------------------------------
+variable "eks_cluster_region" {
+  description = <<-EOT
+    (Optional) The region of the EKS cluster.
+
+    ex:
+    ```
+    eks_cluster_region = "us-west-2"
+    ```
+  EOT
+  type        = string
+  default     = null
+}
 variable "anyscale_cluster_autoscaler_chart" {
   description = <<-EOT
     (Optional) The Helm chart to install the Cluster Autoscaler.
@@ -183,7 +195,7 @@ variable "anyscale_ingress_chart" {
   }
 }
 
-variable "anyscale_ingress_aws_nlb_internal" {
+variable "anyscale_ingress_internal_lb" {
   description = <<-EOT
     (Optioanl) Determines if the AWS NLB should be internal.
 
@@ -192,7 +204,7 @@ variable "anyscale_ingress_aws_nlb_internal" {
 
     ex:
     ```
-    anyscale_ingress_aws_nlb_internal = true
+    anyscale_ingress_internal_lb = true
     ```
   EOT
   type        = bool

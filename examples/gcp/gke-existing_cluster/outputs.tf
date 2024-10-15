@@ -12,9 +12,9 @@ output "anyscale_registration_command" {
     --filestore-location ${module.anyscale_filestore.anyscale_filestore_location} \
     --anyscale-service-account-email ${module.anyscale_iam.iam_anyscale_access_service_acct_email} \
     --provider-name ${module.anyscale_iam.iam_workload_identity_provider_name} \
-    --kubernetes-namespaces <kubernetes-namespaces> \
-    --kubernetes-ingress-external-address <kubernetes-ingress-external-address-or-ip> \
-    --kubernetes-zones <comma-separated-zones> \
-    --kubernetes-dataplane-identity <gke-service-account>
+    --kubernetes-namespaces ${var.anyscale_k8s_namespace} \
+    --kubernetes-ingress-external-address ${module.anyscale_k8s_helm.nginx_ingress_lb_ips[0]} \
+    --kubernetes-zones ${join(",", data.google_container_cluster.anyscale.node_locations)} \
+    --anyscale-operator-iam-identity ${module.anyscale_iam.iam_anyscale_cluster_node_service_acct_email}
   EOT
 }

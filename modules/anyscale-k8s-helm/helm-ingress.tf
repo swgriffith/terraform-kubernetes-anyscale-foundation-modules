@@ -30,6 +30,7 @@ resource "helm_release" "nginx_ingress" {
     }
   }
 
+  # Configure the ingress controller for AWS NLB
   dynamic "set" {
     for_each = var.cloud_provider == "aws" ? [
       {
@@ -48,7 +49,7 @@ resource "helm_release" "nginx_ingress" {
   }
 
   dynamic "set" {
-    for_each = var.cloud_provider == "aws" && var.anyscale_ingress_aws_nlb_internal ? [
+    for_each = var.cloud_provider == "aws" && var.anyscale_ingress_internal_lb ? [
       {
         name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-internal"
         value = "true"
@@ -57,6 +58,20 @@ resource "helm_release" "nginx_ingress" {
     content {
       name  = set.value.name
       value = set.value.value
+    }
+  }
+
+  # Configure the ingress controller for GCP Internal Load Balancer
+  dynamic "set" {
+    for_each = var.cloud_provider == "gcp" && var.anyscale_ingress_internal_lb ? [
+      {
+        name  = "controller.service.annotations.networking\\.gke\\.io/load-balancer-type"
+        value = "Internal"
+      }
+    ] : []
+    content {
+      name  = set.value["name"]
+      value = set.value["value"]
     }
   }
 
@@ -69,10 +84,20 @@ resource "helm_release" "nginx_ingress" {
 
 }
 
+resource "time_sleep" "wait_ingress" {
+  count = local.module_enabled && var.anyscale_ingress_chart.enabled && var.cloud_provider == "gcp" ? 1 : 0
+
+  depends_on      = [helm_release.nginx_ingress]
+  create_duration = "30s"
+}
+
+
 data "kubernetes_service" "nginx_ingress" {
-  count = local.module_enabled ? 1 : 0
+  count = local.module_enabled && var.anyscale_ingress_chart.enabled ? 1 : 0
   metadata {
     name      = "${helm_release.nginx_ingress[0].name}-${helm_release.nginx_ingress[0].chart}-controller"
     namespace = var.anyscale_ingress_chart.namespace
   }
+
+  depends_on = [time_sleep.wait_ingress]
 }

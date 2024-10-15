@@ -30,16 +30,13 @@ variable "anyscale_org_id" {
   }
 }
 
-# -----------------
-# Kubernetes
-# -----------------
-variable "gke_endpoint" {
-  description = "The endpoint for the GKE cluster"
-  type        = string
-}
 
-variable "gke_ca_certificate" {
-  description = "Base64 encoded PEM certificate for the cluster"
+variable "customer_ingress_cidr_ranges" {
+  description = <<-EOT
+    The IPv4 CIDR blocks that allows access Anyscale clusters.
+    These are added to the firewall and allows port 443 (https) and 22 (ssh) access.
+    ex: `52.1.1.23/32,10.1.0.0/16'
+  EOT
   type        = string
 }
 
@@ -51,19 +48,29 @@ variable "existing_vpc_name" {
   type        = string
 }
 
-variable "existing_subnet_name" {
-  description = "The name of the existing Subnet"
+variable "existing_vpc_id" {
+  description = "The ID of the existing VPC"
   type        = string
 }
 
-variable "customer_ingress_cidr_ranges" {
-  description = <<-EOT
-    The IPv4 CIDR blocks that allows access Anyscale clusters.
-    These are added to the firewall and allows port 443 (https) and 22 (ssh) access.
-    ex: `52.1.1.23/32,10.1.0.0/16'
-  EOT
+variable "existing_subnet_cidr" {
+  description = "The CIDR range of the existing subnet"
   type        = string
 }
+
+# -----------------
+# GKE Cluster
+# -----------------
+variable "existing_gke_cluster_name" {
+  description = "The name of the existing GKE cluster"
+  type        = string
+}
+
+variable "existing_gke_cluster_region" {
+  description = "The region of the existing GKE cluster"
+  type        = string
+}
+
 
 # ------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
@@ -108,6 +115,13 @@ variable "labels" {
   description = "(Optional) A map of labels to all resources that accept labels."
   type        = map(string)
   default = {
+    "test" : true,
     "environment" : "test"
   }
+}
+
+variable "anyscale_k8s_namespace" {
+  description = "The Anyscale namespace to deploy the workload"
+  type        = string
+  default     = "anyscale-k8s"
 }

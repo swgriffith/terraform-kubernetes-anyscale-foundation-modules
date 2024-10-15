@@ -55,6 +55,7 @@ module "anyscale_securitygroup" {
   ]
 }
 
+#trivy:ignore:avd-aws-0132
 module "anyscale_s3" {
   #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
   #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
@@ -402,6 +403,7 @@ module "anyscale_k8s_helm" {
   cloud_provider = "aws"
 
   kubernetes_cluster_name = module.anyscale_eks_cluster.eks_cluster_name
+  eks_cluster_region      = var.aws_region
 
   depends_on = [module.anyscale_eks_nodegroups]
 }

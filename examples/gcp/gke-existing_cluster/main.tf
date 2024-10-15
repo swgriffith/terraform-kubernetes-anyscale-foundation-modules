@@ -5,14 +5,12 @@
 #     - Filestore
 #     - IAM Service Accounts
 #     - Firewall Policy
-#     - Nginx ingress controller (Helm Chart)
+#     - Helm Charts
 #   It expects the following to be already created:
 #     - GCP Project
-#     - GKE cluster
-#     - VPC and Subnet
-#     - Dataplane service account: See https://docs.anyscale.com/administration/cloud-deployment/deploy-gcp-cloud
-#     - Workload Identity Provider
-#
+#     - GKE Cluster
+#     - GKE Node Pool
+#     - VPC
 # ---------------------------------------------------------------------------------------------------------------------
 locals {
   full_labels = merge(tomap({
@@ -23,18 +21,6 @@ locals {
   )
 }
 
-module "anyscale_cloudstorage" {
-  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
-  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
-  source         = "github.com/anyscale/terraform-google-anyscale-cloudfoundation-modules//modules/google-anyscale-cloudstorage"
-  module_enabled = true
-
-  anyscale_project_id = var.google_project_id
-  labels              = local.full_labels
-
-  bucket_force_destroy = true
-}
-
 module "anyscale_iam" {
   #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
   #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
@@ -43,9 +29,25 @@ module "anyscale_iam" {
 
   anyscale_org_id                           = var.anyscale_org_id
   create_anyscale_access_role               = true
-  create_anyscale_cluster_node_service_acct = false
+  create_anyscale_cluster_node_service_acct = true # Set to true to bind to a GKE Service Account
+  anyscale_cluster_node_service_acct_name   = "anyscale-cluster-node"
 
   anyscale_project_id = var.google_project_id
+}
+
+module "anyscale_cloudstorage" {
+  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
+  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
+  source         = "github.com/anyscale/terraform-google-anyscale-cloudfoundation-modules//modules/google-anyscale-cloudstorage"
+  module_enabled = true
+
+  bucket_iam_members = [
+    module.anyscale_iam.iam_anyscale_access_service_acct_member,
+    module.anyscale_iam.iam_anyscale_cluster_node_service_acct_member
+  ]
+
+  anyscale_project_id = var.google_project_id
+  labels              = local.full_labels
 }
 
 module "anyscale_filestore" {
@@ -62,15 +64,6 @@ module "anyscale_filestore" {
   labels              = local.full_labels
 }
 
-data "google_compute_network" "existing_vpc" {
-  name = var.existing_vpc_name
-}
-
-data "google_compute_subnetwork" "exising_subnet" {
-  name   = var.existing_subnet_name
-  region = var.google_region
-}
-
 module "anyscale_firewall" {
   #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
   #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
@@ -78,9 +71,9 @@ module "anyscale_firewall" {
   module_enabled = true
 
   vpc_name = var.existing_vpc_name
-  vpc_id   = data.google_compute_network.existing_vpc.id
+  vpc_id   = var.existing_vpc_id
 
-  ingress_with_self_cidr_range = [data.google_compute_subnetwork.exising_subnet.ip_cidr_range]
+  ingress_with_self_cidr_range = [var.existing_subnet_cidr]
   ingress_from_cidr_map = [
     {
       rule        = "https-443-tcp"
@@ -95,28 +88,45 @@ module "anyscale_firewall" {
   anyscale_project_id = var.google_project_id
 }
 
-resource "helm_release" "ingress_nginx" {
-  name       = "ingress-nginx"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  version    = "4.11.2"
-  namespace  = "ingress-nginx"
 
-  create_namespace = true
-  wait             = false
+module "anyscale_k8s_namespace" {
+  source = "../../../modules/anyscale-k8s-namespace"
 
-  set {
-    name  = "controller.service.type"
-    value = "LoadBalancer"
+  module_enabled = true
+  cloud_provider = "gcp"
+
+  kubernetes_cluster_name       = var.existing_gke_cluster_name
+  anyscale_kubernetes_namespace = var.anyscale_k8s_namespace
+}
+
+// Optional for managing Kupernetes service account bindings to GCP IAM roles
+resource "kubernetes_service_account" "anyscale" {
+  metadata {
+    name      = "anyscale-service-account"
+    namespace = var.anyscale_k8s_namespace
+
+    annotations = {
+      "iam.gke.io/gcp-service-account" = module.anyscale_iam.iam_anyscale_cluster_node_service_acct_email
+    }
   }
 
-  set {
-    name  = "controller.service.annotations.cloud\\.google\\.com/load-balancer-type"
-    value = "External"
-  }
+  depends_on = [module.anyscale_k8s_namespace]
+}
 
-  set {
-    name  = "controller.service.externalTrafficPolicy"
-    value = "Local"
-  }
+resource "google_service_account_iam_binding" "workload_identity_bindings" {
+  role               = "roles/iam.workloadIdentityUser"
+  service_account_id = module.anyscale_iam.iam_anyscale_cluster_node_service_acct_name
+  members            = ["serviceAccount:${var.google_project_id}.svc.id.goog[${var.anyscale_k8s_namespace}/anyscale-operator]"]
+}
+
+module "anyscale_k8s_helm" {
+  source = "../../../modules/anyscale-k8s-helm"
+
+  module_enabled = true
+  cloud_provider = "gcp"
+
+  kubernetes_cluster_name = data.google_container_cluster.anyscale.name
+
+  anyscale_cluster_autoscaler_chart = { enabled = false }
+  anyscale_metrics_server_chart     = { enabled = false }
 }
