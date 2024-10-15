@@ -23,8 +23,8 @@ google_project_id = "..."
 existing_vpc_name            = "..."
 existing_subnet_name         = "..."
 customer_ingress_cidr_ranges = "0.0.0.0/0"
-gke_endpoint       = "..."
-gke_ca_certificate = "..."
+existing_gke_cluster_name    = "..."
+existing_gke_cluster_region  = "..."
 ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
