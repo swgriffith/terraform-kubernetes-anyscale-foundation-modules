@@ -3,18 +3,29 @@
 [![Google Provider Version][badge-tf-google]](https://github.com/terraform-providers/terraform-provider-google/releases)
 
 # Anyscale GCP GKE Example - Existing Cluster
-This example creates the resources to run Anyscale on GCP GKE with an existing cluster
-**Work in progress**
 
-## Needs to Create:
-- DONE - filestore
-- DONE - IAM Service Accounts for ControlPlane
-- DONE - Firewall
-- IAM Service Accounts for Dataplane (?) (needs a cluster role for GKE)
-- DONE - storage bucket
-- namespace
-- helm charts
-- configmap
+This example creates the resources to run Anyscale on GCP GKE with an existing GKE cluster.
+
+## Known Issues on GKE
+
+- Autopilot GKE clusters are not supported.
+- Node auto-provisioning for GKE failing with GPU nodes: https://github.com/GoogleCloudPlatform/container-engine-accelerators/issues/407
+- When choosing "GPU Driver installation", select "Google-managed".
+
+## terraform.tfvars
+
+```hcl
+anyscale_deploy_env = "..."
+anyscale_org_id     = "..." # Troubleshooting Org Id
+
+google_region     = "..."
+google_project_id = "..."
+existing_vpc_name            = "..."
+existing_subnet_name         = "..."
+customer_ingress_cidr_ranges = "0.0.0.0/0"
+gke_endpoint       = "..."
+gke_ca_certificate = "..."
+```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
