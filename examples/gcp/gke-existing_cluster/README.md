@@ -41,8 +41,8 @@ existing_gke_cluster_region  = "..."
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | 5.44.1 |
-| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.32.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | 5.44.2 |
+| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.33.0 |
 
 ## Modules
 
