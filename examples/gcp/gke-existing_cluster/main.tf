@@ -21,6 +21,7 @@ locals {
   )
 }
 
+#trivy:ignore:AVD-GCP-0011
 module "anyscale_iam" {
   #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
   #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
@@ -28,9 +29,14 @@ module "anyscale_iam" {
   module_enabled = true
 
   anyscale_org_id                           = var.anyscale_org_id
-  create_anyscale_access_role               = true
+  create_anyscale_access_role               = false
+  create_anyscale_access_service_acct       = true
   create_anyscale_cluster_node_service_acct = true # Set to true to bind to a GKE Service Account
-  anyscale_cluster_node_service_acct_name   = "anyscale-cluster-node"
+  anyscale_cluster_node_service_acct_name   = "anyscale-dataplane-node"
+  anyscale_cluster_node_service_acct_permissions = [
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/artifactregistry.reader"
+  ]
 
   anyscale_project_id = var.google_project_id
 }
@@ -42,7 +48,7 @@ module "anyscale_cloudstorage" {
   module_enabled = true
 
   bucket_iam_members = [
-    module.anyscale_iam.iam_anyscale_access_service_acct_member,
+    # module.anyscale_iam.iam_anyscale_access_service_acct_member,
     module.anyscale_iam.iam_anyscale_cluster_node_service_acct_member
   ]
 
