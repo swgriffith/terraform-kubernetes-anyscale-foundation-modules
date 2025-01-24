@@ -5,9 +5,6 @@
 # Anyscale AWS EKS Example - Private Networking
 This example creates the resources to run Anyscale on AWS EKS with fully private networking.
 
-**NOTE**
-Not fully tested! Known to need some additional work.
-
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 

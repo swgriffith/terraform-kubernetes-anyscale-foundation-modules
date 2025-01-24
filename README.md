@@ -25,7 +25,7 @@ These modules are designed with best practices in mind, ensuring a secure, effic
 The examples folder has a couple common use cases that have been tested. These include:
 * Anyscale - AWS & EKS
   * [Build everything - use a common name for all resources, public networking](./examples/aws/eks-public)
-  * [Build everything - use a common name for all resources, private networking](./examples/aws/eks-private) ** Not fully tested **
+  * [Build everything - use a common name for all resources, private networking](./examples/aws/eks-private)
 * Anyscale - GCP & GKE
   * [Build everything - use a common name for all resources, public networking](./examples/aws/gke-public/) ** Not Started **
   * [Build everything - use a common name for all resources, private networking](./examples/aws/gke-private/) ** Not Started **
