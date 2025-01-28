@@ -18,10 +18,7 @@ output "anyscale_register_command" {
     --name <CUSTOMER_DEFINED_NAME> \
     --region ${var.aws_region} \
     --compute-stack k8s \
-    --anyscale-iam-role-id ${module.anyscale_iam_roles.iam_anyscale_access_role_arn} \
     --s3-bucket-id ${module.anyscale_s3.s3_bucket_id} \
-    --kubernetes-namespaces ${module.anyscale_k8s_namespace.anyscale_kubernetes_namespace_name} \
-    --kubernetes-ingress-external-address ${module.anyscale_k8s_helm.nginx_ingress_lb_hostname[0]} \
     --kubernetes-zones ${local.kubernetes_zones} \
     --anyscale-operator-iam-identity ${module.anyscale_iam_roles.iam_anyscale_eks_node_role_arn}
   EOT

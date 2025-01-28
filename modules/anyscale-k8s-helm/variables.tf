@@ -369,3 +369,44 @@ variable "anyscale_prometheus_chart" {
     values        = {}
   }
 }
+
+variable "anyscale_aws_loadbalancer_chart" {
+  description = <<-EOT
+    (Optional) The Helm chart to install the AWS Load Balancer Controller.
+
+    Requires `cloud_provider` to be set to `aws`.
+
+    ex:
+    ```
+    anyscale_aws_loadbalancer_chart = {
+      enabled       = true
+      name          = "aws-load-balancer-controller"
+      respository   = "https://aws.github.io/eks-charts"
+      chart         = "aws-load-balancer-controller"
+      chart_version = "1.2.7"
+      namespace     = "kube-system"
+      values        = {
+        "some.other.config" = "value"
+      }
+    }
+    ```
+  EOT
+  type = object({
+    enabled       = bool
+    name          = optional(string)
+    repository    = optional(string)
+    chart         = optional(string)
+    chart_version = optional(string)
+    namespace     = optional(string)
+    values        = optional(map(string))
+  })
+  default = {
+    enabled       = true
+    name          = "aws-load-balancer-controller"
+    repository    = "https://aws.github.io/eks-charts"
+    chart         = "aws-load-balancer-controller"
+    chart_version = "2.11.0"
+    namespace     = "kube-system"
+    values        = {}
+  }
+}

@@ -17,7 +17,6 @@ output "anyscale_register_command" {
     anyscale cloud register --provider aws \
     --name <CUSTOMER_DEFINED_NAME> \
     --compute-stack k8s \
-    --anyscale-iam-role-id ${module.anyscale_iam_roles.iam_anyscale_access_role_arn} \
     --region ${var.aws_region} \
     --s3-bucket-id ${module.anyscale_s3.s3_bucket_id} \
     --efs-id ${module.anyscale_efs.efs_id} \
