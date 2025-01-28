@@ -94,7 +94,7 @@ module "anyscale_iam_roles" {
 
   module_enabled = true
 
-  create_anyscale_access_role = true
+  create_anyscale_access_role = false
   # anyscale_trusted_role_arns           = var.anyscale_trusted_role_arns
   create_cluster_node_instance_profile = false
 
