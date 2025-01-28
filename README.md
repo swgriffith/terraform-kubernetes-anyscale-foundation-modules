@@ -24,8 +24,13 @@ These modules are designed with best practices in mind, ensuring a secure, effic
 ### Examples
 The examples folder has a couple common use cases that have been tested. These include:
 * Anyscale - AWS & EKS
+<<<<<<< HEAD
   * [eks-private](https://github.com/anyscale/terraform-kubernetes-anyscale-foundation-modules/tree/main/examples/aws/eks-private) - Build everything - use a common name for all resources, public networking
   * [eks-public](https://github.com/anyscale/terraform-kubernetes-anyscale-foundation-modules/tree/main/examples/aws/eks-public) - Build everything - use a common name for all resources, private networking
+=======
+  * [eks-public](https://github.com/anyscale/terraform-kubernetes-anyscale-foundation-modules/tree/main/examples/aws/eks-public) - Build everything - use a common name for all resources, public networking
+  * [eks-private](https://github.com/anyscale/terraform-kubernetes-anyscale-foundation-modules/tree/main/examples/aws/eks-private) - Build everything - use a common name for all resources, private networking
+>>>>>>> e7d5d13 (upd: General cleanup)
 * Anyscale - GCP & GKE
   * [gke-existing_cluster](https://github.com/anyscale/terraform-kubernetes-anyscale-foundation-modules/tree/main/examples/gcp/gke-existing_cluster) - Use an existing GKE cluster, build additional resources such as object storage, service accounts, filestore.
   * [gke-public] - Build everything - use a common name for all resources, public networking - ** Not Started **
