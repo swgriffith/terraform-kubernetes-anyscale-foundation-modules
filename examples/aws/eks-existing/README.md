@@ -2,8 +2,8 @@
 [![Terraform Version][badge-terraform]](https://github.com/hashicorp/terraform/releases)
 [![AWS Provider Version][badge-tf-aws]](https://github.com/terraform-providers/terraform-provider-aws/releases)
 
-# Anyscale AWS EKS Example - Private Networking
-This example creates the resources to run Anyscale on AWS EKS with a private networking (only accessible via VPN).
+# Anyscale AWS EKS Example - Public Networking
+This example creates the resources to run Anyscale on existing AWS EKS.
 
 ## Getting Started
 
@@ -12,6 +12,12 @@ This example creates the resources to run Anyscale on AWS EKS with a private net
 * AWS Credentials
 * kubectl CLI
 * helm CLI
+
+Ensure your EKS cluster:
+
+* Use the same VPC `module.anyscale_vpc.vpc_id`
+* Use the same private subnet `module.anyscale_vpc.private_subnet_ids` for Node Group
+* Attach the IAM policy `module.anyscale_iam_roles.anyscale_iam_s3_policy_arn` and `arn:aws:iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess` to the Node IAM role
 
 ### Creating Anyscale Resources
 
@@ -37,7 +43,7 @@ helm repo add autoscaler https://kubernetes.github.io/autoscaler
 helm install cluster-autoscaler autoscaler/cluster-autoscaler --version 9.46.0 \
     --namespace kube-system \
     --set awsRegion="us-west-2" \
-    --set 'autoDiscovery.clusterName'=anyscale-eks-private
+    --set 'autoDiscovery.clusterName'=anyscale-eks-public
 ```
 
 **Install [AWS LBC (load balancer controller)](https://github.com/kubernetes-sigs/aws-load-balancer-controller/tree/main/helm/aws-load-balancer-controller)**:
@@ -45,7 +51,7 @@ helm install cluster-autoscaler autoscaler/cluster-autoscaler --version 9.46.0 \
 ```shell
 helm repo add eks https://aws.github.io/eks-charts
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller --version 1.11.0 -n kube-system \
-  --set clusterName=anyscale-eks-private
+  --set clusterName=anyscale-eks-public
 ```
 
 **Install [Nginx ingress controller](https://kubernetes.github.io/ingress-nginx/deploy/)**:
@@ -57,7 +63,7 @@ controller:
   service:
     type: LoadBalancer
     annotations:
-      service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
       service.beta.kubernetes.io/aws-load-balancer-type: nlb
   allowSnippetAnnotations: true
@@ -134,16 +140,12 @@ helm upgrade -i nvdp nvdp/nvidia-device-plugin \
 | <a name="module_anyscale_iam_roles"></a> [anyscale\_iam\_roles](#module\_anyscale\_iam\_roles) | github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-iam | n/a |
 | <a name="module_anyscale_s3"></a> [anyscale\_s3](#module\_anyscale\_s3) | github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-s3 | n/a |
 | <a name="module_anyscale_vpc"></a> [anyscale\_vpc](#module\_anyscale\_vpc) | github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-vpc | n/a |
-| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.33.1 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [aws_iam_policy.autoscaler_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.elb_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_security_group.allow_all_vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_iam_role.default_nodegroup](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
 
 ## Inputs
 
@@ -151,7 +153,7 @@ helm upgrade -i nvdp nvdp/nvidia-device-plugin \
 |------|-------------|------|---------|:--------:|
 | <a name="input_anyscale_s3_cors_rule"></a> [anyscale\_s3\_cors\_rule](#input\_anyscale\_s3\_cors\_rule) | (Optional) A map of CORS rules for the S3 bucket.<br><br>Including here to override for Anyscale Staging. | `map(any)` | <pre>{<br>  "allowed_headers": [<br>    "*"<br>  ],<br>  "allowed_methods": [<br>    "GET",<br>    "POST",<br>    "PUT",<br>    "HEAD",<br>    "DELETE"<br>  ],<br>  "allowed_origins": [<br>    "https://*.anyscale.com"<br>  ],<br>  "expose_headers": []<br>}</pre> | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region in which all resources will be created. | `string` | `"us-east-2"` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | (Optional) A map of tags to all resources that accept tags. | `map(string)` | <pre>{<br>  "Environment": "dev",<br>  "Example": "aws/eks-private",<br>  "Repo": "terraform-kubernetes-anyscale-foundation-modules",<br>  "Test": "true"<br>}</pre> | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | (Optional) A map of tags to all resources that accept tags. | `map(string)` | <pre>{<br>  "Environment": "dev",<br>  "Example": "aws/eks-public",<br>  "Repo": "terraform-kubernetes-anyscale-foundation-modules",<br>  "Test": "true"<br>}</pre> | no |
 
 ## Outputs
 
