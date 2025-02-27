@@ -3,30 +3,31 @@
 [![AWS Provider Version][badge-tf-aws]](https://github.com/terraform-providers/terraform-provider-aws/releases)
 
 # Anyscale AWS EKS Example - Private Networking
-This example creates the resources to run Anyscale on AWS EKS with a private networking (only accessible via VPN).
+This example creates the resources to run Anyscale on AWS EKS with private networking (only accessible via VPN).
 
 ## Getting Started
 
-### Prerequisite
+### Prerequisites
 
-* AWS Credentials
-* kubectl CLI
-* helm CLI
+* [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+* [AWS Credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
+* [kubectl CLI](https://kubernetes.io/docs/tasks/tools/)
+* [helm CLI](https://helm.sh/docs/intro/install/)
 
 ### Creating Anyscale Resources
 
-Create `terraform.tfvars`:
+Steps for deploying Anyscale resources via Terraform:
 
-```hcl
-aws_region = "us-west-2"
-```
-
-Run:
+* Review variables.tf and (optionally) create a `local.tfvars` file to override any of the defaults.
+* Apply the terraform
 
 ```shell
 terraform init
+terraform plan
 terraform apply
 ```
+
+If you are using a `tfvars` file, you will need to update the above commands accordingly.
 
 ### Installing K8s Components
 
