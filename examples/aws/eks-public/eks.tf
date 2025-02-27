@@ -33,8 +33,8 @@ module "eks" {
   version = "20.33.1"
 
   # Cluster basic configuration
-  cluster_name    = "anyscale-eks-public"
-  cluster_version = "1.31"
+  cluster_name    = var.eks_cluster_name
+  cluster_version = var.eks_cluster_version
 
   cluster_addons = {
     coredns                = {}
