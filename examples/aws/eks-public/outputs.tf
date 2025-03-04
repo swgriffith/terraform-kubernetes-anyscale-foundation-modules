@@ -6,6 +6,16 @@ data "aws_iam_role" "default_nodegroup" {
   name = module.eks.eks_managed_node_groups["default"].iam_role_name
 }
 
+output "eks_cluster_name" {
+  description = "The name of the EKS cluster. This is used for Helm chart values."
+  value       = var.eks_cluster_name
+}
+
+output "aws_region" {
+  description = "The AWS region. This is used for Helm chart values."
+  value       = var.aws_region
+}
+
 output "anyscale_register_command" {
   description = <<-EOF
     Anyscale register command.
