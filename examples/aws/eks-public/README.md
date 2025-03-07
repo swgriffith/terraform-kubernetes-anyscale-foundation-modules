@@ -1,4 +1,3 @@
-[![Build Status][badge-build]][build-status]
 [![Terraform Version][badge-terraform]](https://github.com/hashicorp/terraform/releases)
 [![AWS Provider Version][badge-tf-aws]](https://github.com/terraform-providers/terraform-provider-aws/releases)
 
@@ -29,7 +28,7 @@ terraform apply
 ```
 
 If you are using a `tfvars` file, you will need to update the above commands accordingly.
-Note the output from Terraform which includes a cloud registration command you will use below.
+Note the output from Terraform which includes an example cloud registration command you will use below.
 
 ### Install the Kubernetes Requirements
 
@@ -43,23 +42,28 @@ Ensure that you are [authenticated to the EKS cluster](https://docs.aws.amazon.c
 
 #### Install the Cluster autoscaler
 
+1. Run the following to install the Kubernetes Autoscaler helm chart:
+
 ```shell
 helm repo add autoscaler https://kubernetes.github.io/autoscaler
-helm install cluster-autoscaler autoscaler/cluster-autoscaler \
+helm upgrade cluster-autoscaler autoscaler/cluster-autoscaler \
   --version 9.46.0 \
   --namespace kube-system \
   --set awsRegion=<aws_region> \
   --set 'autoDiscovery.clusterName'=<eks_cluster_name>
+  --install
 ```
 
 #### Install the AWS LBC (load balancer controller)
+1. Run the following to install the AWS Load Balancer Controller helm chart:
 
 ```shell
 helm repo add eks https://aws.github.io/eks-charts
-helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+helm upgrade aws-load-balancer-controller eks/aws-load-balancer-controller \
   --version 1.11.0 \
   --namespace kube-system \
-  --set clusterName=<eks_cluster_name>
+  --set clusterName=<eks_cluster_name> \
+  --install
 ```
 
 #### Install the Nginx ingress controller
@@ -86,11 +90,12 @@ controller:
 
 ```shell
 helm repo add nginx https://kubernetes.github.io/ingress-nginx
-helm upgrade --install ingress-nginx nginx/ingress-nginx \
+helm upgrade ingress-nginx nginx/ingress-nginx \
   --version 4.12.0 \
   --namespace ingress-nginx \
+  --values values_elb.yaml \
   --create-namespace \
-  -f values_elb.yaml
+  --install
 ```
 
 
@@ -126,11 +131,12 @@ tolerations:
 
 ```shell
 helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
-helm upgrade -i nvdp nvdp/nvidia-device-plugin \
+helm upgrade nvdp nvdp/nvidia-device-plugin \
   --namespace nvidia-device-plugin \
-  --create-namespace \
   --version 0.17.0 \
-  -f values_nvdp.yaml
+  --values values_nvdp.yaml \
+  --create-namespace \
+  --install
 ```
 
 ### Register the Anyscale Cloud
@@ -158,6 +164,21 @@ Output
 ```
 
 ### Install the Anyscale Operator
+
+1. Using the below example, replace `<aws_region>` with the AWS region where EKS is running, and replace `<cloud-deployment-id>` with the appropriate value from the `anyscale cloud register` output. Please note that you can also change the namespace to one that you wish to associate with Anyscale pods.
+2. Using your updated helm upgrade command, install the Anyscale Operator.
+
+```shell
+helm repo add anyscale https://anyscale.github.io/helm-charts
+helm upgrade anyscale-public anyscale/anyscale-operator \
+  --set-string cloudDeploymentId=<cloud-deployment-id> \
+  --set-string cloudProvider=aws \
+  --set-string region=<aws_region> \
+  --set-string workloadServiceAccountName=anyscale-operator \
+  --namespace anyscale-public \
+  --create-namespace \
+  --install
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -214,7 +235,7 @@ Output
 <!-- References -->
 [Terraform]: https://www.terraform.io
 [Issues]: https://github.com/anyscale/sa-sandbox-terraform/issues
-[badge-build]: https://github.com/anyscale/sa-sandbox-terraform/workflows/CI/CD%20Pipeline/badge.svg
+<!-- [badge-build]: https://github.com/anyscale/sa-sandbox-terraform/workflows/CI/CD%20Pipeline/badge.svg -->
 [badge-terraform]: https://img.shields.io/badge/terraform-1.x%20-623CE4.svg?logo=terraform
 [badge-tf-aws]: https://img.shields.io/badge/AWS-5.+-F8991D.svg?logo=terraform
 [build-status]: https://github.com/anyscale/sa-sandbox-terraform/actions
