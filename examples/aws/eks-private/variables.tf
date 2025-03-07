@@ -50,28 +50,6 @@ variable "tags" {
   }
 }
 
-variable "anyscale_s3_cors_rule" {
-  description = <<-EOT
-    (Optional) A map of CORS rules for the S3 bucket.
-
-    ex:
-    ```
-    anyscale_s3_cors_rule = {
-      allowed_headers = ["*"]
-      allowed_methods = ["GET", "POST", "PUT", "HEAD", "DELETE"]
-      allowed_origins = ["https://*.anyscale.com"]
-    }
-    ```
-  EOT
-  type        = map(any)
-  default = {
-    allowed_headers = ["*"]
-    allowed_methods = ["GET", "POST", "PUT", "HEAD", "DELETE"]
-    allowed_origins = ["https://*.anyscale.com"]
-    expose_headers  = []
-  }
-}
-
 variable "eks_cluster_name" {
   description = <<-EOT
     (Optional) The name of the EKS cluster.

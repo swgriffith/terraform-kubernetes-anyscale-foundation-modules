@@ -18,7 +18,7 @@ module "anyscale_vpc" {
   #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
   source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-vpc"
 
-  anyscale_vpc_name = "anyscale-eks-public"
+  anyscale_vpc_name = "anyscale-${var.eks_cluster_name}"
   cidr_block        = "172.24.0.0/16"
 
   public_subnets  = local.public_subnets
@@ -41,8 +41,6 @@ module "anyscale_s3" {
   module_enabled = true
 
   anyscale_bucket_name = "${var.eks_cluster_name}-${var.aws_region}"
-  force_destroy        = true
-  cors_rule            = var.anyscale_s3_cors_rule
 
   tags = var.tags
 }
@@ -80,7 +78,7 @@ module "anyscale_efs" {
 
   module_enabled = true
 
-  anyscale_efs_name          = "anyscale-eks-public-efs"
+  anyscale_efs_name          = "anyscale-${var.eks_cluster_name}"
   mount_targets_subnet_count = length(local.private_subnets)
   mount_targets_subnets      = module.anyscale_vpc.private_subnet_ids
 
