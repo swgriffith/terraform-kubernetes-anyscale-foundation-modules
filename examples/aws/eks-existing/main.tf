@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------------------------------------------------
-# Example Anyscale K8s Resources - Public Networking
+# Example Anyscale K8s Resources - Existing EKS Cluster
 #   This template creates EKS resources for Anyscale
 #   It creates:
 #     - VPC
@@ -7,30 +7,6 @@
 #     - S3 Bucket
 #     - IAM policies
 # ---------------------------------------------------------------------------------------------------------------------
-
-locals {
-  public_subnets  = ["172.24.101.0/24", "172.24.102.0/24", "172.24.103.0/24"]
-  private_subnets = ["172.24.20.0/24", "172.24.21.0/24", "172.24.22.0/24"]
-}
-
-module "anyscale_vpc" {
-  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
-  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
-  source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-vpc"
-
-  anyscale_vpc_name = "anyscale-eks-public"
-  cidr_block        = "172.24.0.0/16"
-
-  public_subnets  = local.public_subnets
-  private_subnets = local.private_subnets
-
-  public_subnet_tags = {
-    "kubernetes.io/role/elb" = "1"
-  }
-  private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = "1"
-  }
-}
 
 #trivy:ignore:avd-aws-0132
 module "anyscale_s3" {
@@ -40,35 +16,35 @@ module "anyscale_s3" {
 
   module_enabled = true
 
-  anyscale_bucket_name = "anyscale-eks-public-${var.aws_region}"
-  force_destroy        = true
-  cors_rule            = var.anyscale_s3_cors_rule
+  anyscale_bucket_name = "anyscale-eks-existing-${var.aws_region}"
 
   tags = var.tags
 }
 
-#trivy:ignore:avd-aws-0104
-resource "aws_security_group" "allow_all_vpc" {
-  #checkov:skip=CKV2_AWS_5: "Ensure that Security Groups are attached to another resource"
-  name        = "allow-all-vpc"
-  description = "Allow all traffic within the VPC"
-  vpc_id      = module.anyscale_vpc.vpc_id
 
-  ingress {
-    description = "Allow all traffic from within the VPC"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [module.anyscale_vpc.vpc_cidr_block]
-  }
+locals {
+  ingress_from_cidr_map = [
+    {
+      rule        = "https-443-tcp"
+      cidr_blocks = var.customer_ingress_cidr_ranges
+    },
+    {
+      rule        = "ssh-tcp"
+      cidr_blocks = var.customer_ingress_cidr_ranges
+    }
+  ]
+}
 
-  egress {
-    description = "Allow all traffic to the internet"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+# This creates a security group which will need to be modified to your specific needs for ingress from end users to Anyscale Clusters.
+module "aws_anyscale_securitygroup_self" {
+  #checkov:skip=CKV_TF_1: Example code should use the latest version of the module
+  #checkov:skip=CKV_TF_2: Example code should use the latest version of the module
+  source = "github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-securitygroups"
+  vpc_id = var.existing_vpc_id
+
+  security_group_name                       = "anyscale-eks-existing"
+  ingress_from_cidr_map                     = local.ingress_from_cidr_map
+  ingress_with_existing_security_groups_map = []
 
   tags = var.tags
 }
@@ -81,10 +57,10 @@ module "anyscale_efs" {
   module_enabled = true
 
   anyscale_efs_name          = "anyscale-eks-public-efs"
-  mount_targets_subnet_count = length(local.private_subnets)
-  mount_targets_subnets      = module.anyscale_vpc.private_subnet_ids
+  mount_targets_subnet_count = length(var.existing_subnet_ids)
+  mount_targets_subnets      = var.existing_subnet_ids
 
-  associated_security_group_ids = [aws_security_group.allow_all_vpc.id]
+  associated_security_group_ids = [module.aws_anyscale_securitygroup_self.security_group_id]
 
   tags = var.tags
 }

@@ -5,6 +5,9 @@
 # Anyscale AWS EKS Example - Private Networking
 This example creates the resources to run Anyscale on AWS EKS with private networking (only accessible via VPN).
 
+The content of this module should be used as a starting point and modified to your own security and infrastructure
+requirements.
+
 ## Getting Started
 
 ### Prerequisites

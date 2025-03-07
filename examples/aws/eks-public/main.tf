@@ -78,7 +78,7 @@ module "anyscale_efs" {
 
   module_enabled = true
 
-  anyscale_efs_name          = "anyscale-eks-public-efs"
+  anyscale_efs_name          = "anyscale-${var.eks_cluster_name}"
   mount_targets_subnet_count = length(local.private_subnets)
   mount_targets_subnets      = module.anyscale_vpc.private_subnet_ids
 

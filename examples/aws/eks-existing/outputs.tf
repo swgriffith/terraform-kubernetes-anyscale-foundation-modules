@@ -1,5 +1,10 @@
+data "aws_subnet" "existing" {
+  for_each = toset(var.existing_subnet_ids)
+  id       = each.value
+}
+
 locals {
-  kubernetes_zones = join(",", module.anyscale_vpc.availability_zones)
+  kubernetes_zones = join(",", [for s in data.aws_subnet.existing : s.availability_zone])
 }
 
 output "anyscale_register_command" {
