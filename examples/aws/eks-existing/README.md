@@ -2,8 +2,8 @@
 [![Terraform Version][badge-terraform]](https://github.com/hashicorp/terraform/releases)
 [![AWS Provider Version][badge-tf-aws]](https://github.com/terraform-providers/terraform-provider-aws/releases)
 
-# Anyscale AWS EKS Example - Private Networking
-This example creates the resources to run Anyscale on AWS EKS with private networking (only accessible via VPN).
+# Anyscale AWS EKS Example - Existing EKS Cluster
+This example creates the resources to run Anyscale on an existing AWS EKS cluster.
 
 The content of this module should be used as a starting point and modified to your own security and infrastructure
 requirements.
@@ -17,6 +17,12 @@ requirements.
 * [kubectl CLI](https://kubernetes.io/docs/tasks/tools/)
 * [helm CLI](https://helm.sh/docs/intro/install/)
 * [Anyscale CLI](https://docs.anyscale.com/reference/quickstart-cli/)
+* Existing [AWS VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
+* Existing [AWS EKS Cluster](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html) running in the existing VPC
+
+Ensure your EKS cluster:
+
+* Attach the IAM policy `module.anyscale_iam_roles.anyscale_iam_s3_policy_arn` and `arn:aws:iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess` to the Node IAM role
 
 ### Creating Anyscale Resources
 
@@ -32,9 +38,8 @@ terraform apply
 ```
 
 If you are using a `tfvars` file, you will need to update the above commands accordingly.
-Note the output from Terraform which includes an example cloud registration command you will use below.
 
-### Install the Kubernetes Requirements
+### Installing K8s Components
 
 The Anyscale Operator requires the following components:
 * [Cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/charts/cluster-autoscaler)
@@ -82,7 +87,7 @@ controller:
   service:
     type: LoadBalancer
     annotations:
-      service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
       service.beta.kubernetes.io/aws-load-balancer-type: nlb
   allowSnippetAnnotations: true
@@ -204,34 +209,29 @@ helm upgrade anyscale-private anyscale/anyscale-operator \
 | <a name="module_anyscale_efs"></a> [anyscale\_efs](#module\_anyscale\_efs) | github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-efs | n/a |
 | <a name="module_anyscale_iam_roles"></a> [anyscale\_iam\_roles](#module\_anyscale\_iam\_roles) | github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-iam | n/a |
 | <a name="module_anyscale_s3"></a> [anyscale\_s3](#module\_anyscale\_s3) | github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-s3 | n/a |
-| <a name="module_anyscale_vpc"></a> [anyscale\_vpc](#module\_anyscale\_vpc) | github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-vpc | n/a |
-| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.33.1 |
+| <a name="module_aws_anyscale_securitygroup_self"></a> [aws\_anyscale\_securitygroup\_self](#module\_aws\_anyscale\_securitygroup\_self) | github.com/anyscale/terraform-aws-anyscale-cloudfoundation-modules//modules/aws-anyscale-securitygroups | n/a |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [aws_iam_policy.autoscaler_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.elb_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_security_group.allow_all_vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_iam_role.default_nodegroup](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
+| [aws_subnet.existing](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | (Optional) The AWS region in which all resources will be created.<br/><br/>ex:<pre>aws_region = "us-east-2"</pre> | `string` | `"us-east-2"` | no |
-| <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name) | (Optional) The name of the EKS cluster.<br/><br/>This will be used for naming resources created by this module including the EKS cluster and the S3 bucket.<br/><br/>ex:<pre>eks_cluster_name = "anyscale-eks-public"</pre> | `string` | `"anyscale-eks-public"` | no |
-| <a name="input_eks_cluster_version"></a> [eks\_cluster\_version](#input\_eks\_cluster\_version) | (Optional) The Kubernetes version of the EKS cluster.<br/><br/>ex:<pre>eks_cluster_version = "1.31"</pre> | `string` | `"1.31"` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | (Optional) A map of tags to all resources that accept tags.<br/><br/>ex:<pre>tags = {<br/>  Environment = "dev"<br/>  Repo        = "terraform-kubernetes-anyscale-foundation-modules",<br/>}</pre> | `map(string)` | <pre>{<br/>  "Environment": "dev",<br/>  "Example": "aws/eks-private",<br/>  "Repo": "terraform-kubernetes-anyscale-foundation-modules",<br/>  "Test": "true"<br/>}</pre> | no |
+| <a name="input_customer_ingress_cidr_ranges"></a> [customer\_ingress\_cidr\_ranges](#input\_customer\_ingress\_cidr\_ranges) | The IPv4 CIDR block that is allowed to access the clusters.<br/>This provides the ability to lock down the v1 stack to just the public IPs of a corporate network.<br/>This is added to the security group and allows port 443 (https) and 22 (ssh) access.<br/>ex: `52.1.1.23/32,10.1.0.0/16'<br/>` | `string` | n/a | yes |
+| <a name="input_existing_subnet_ids"></a> [existing\_subnet\_ids](#input\_existing\_subnet\_ids) | (Required) Existing Subnet IDs.<br/>The IDs of existing subnets to use. This should not be the entire ARN of the subnet, just the ID.<br/>These subnets should be in the `existing_vpc_id`.<br/>ex:<pre>existing_subnet_ids = ["subnet-1234567890", "subnet-0987654321"]</pre> | `list(string)` | n/a | yes |
+| <a name="input_existing_vpc_id"></a> [existing\_vpc\_id](#input\_existing\_vpc\_id) | (Required) Existing VPC ID.<br/>The ID of an existing VPC to use. This should not be the entire ARN of the VPC, just the ID.<br/>ex:<pre>existing_vpc_id = "vpc-1234567890"</pre><pre></pre> | `string` | n/a | yes |
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region in which all resources will be created. | `string` | `"us-east-2"` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | (Optional) A map of tags to all resources that accept tags. | `map(string)` | <pre>{<br/>  "Environment": "dev",<br/>  "Example": "aws/eks-existing",<br/>  "Repo": "terraform-kubernetes-anyscale-foundation-modules",<br/>  "Test": "true"<br/>}</pre> | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
 | <a name="output_anyscale_register_command"></a> [anyscale\_register\_command](#output\_anyscale\_register\_command) | Anyscale register command.<br/>This output can be used with the Anyscale CLI to register a new Anyscale Cloud.<br/>You will need to replace `<CUSTOMER_DEFINED_NAME>` with a name of your choosing before running the Anyscale CLI command. |
-| <a name="output_aws_region"></a> [aws\_region](#output\_aws\_region) | The AWS region. This is used for Helm chart values. |
-| <a name="output_eks_cluster_name"></a> [eks\_cluster\_name](#output\_eks\_cluster\_name) | The name of the EKS cluster. This is used for Helm chart values. |
 <!-- END_TF_DOCS -->
 
 <!-- References -->
