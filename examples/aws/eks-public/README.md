@@ -21,7 +21,7 @@ requirements.
 
 Steps for deploying Anyscale resources via Terraform:
 
-* Review variables.tf and (optionally) create a `local.tfvars` file to override any of the defaults.
+* Review variables.tf and (optionally) create a `terraform.tfvars` file to override any of the defaults.
 * Apply the terraform
 
 ```shell
