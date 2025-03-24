@@ -1,7 +1,8 @@
 output "anyscale_registration_command" {
   description = "The Anyscale registration command."
   value       = <<-EOT
-anyscale cloud register --name <anyscale_cloud_name> \
+anyscale cloud register \
+  --name <anyscale_cloud_name> \
   --provider gcp \
   --region ${var.google_region} \
   --compute-stack k8s \

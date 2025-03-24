@@ -1,0 +1,6 @@
+scan:
+  skip-dirs:
+    - "**/.terraform"
+misconfiguration:
+  terraform:
+    exclude-downloaded-modules: true

@@ -23,7 +23,7 @@ locals {
     max_count              = 10
     initial_node_count     = 0
     local_ssd_count        = 0
-    disk_size_gb           = 100
+    disk_size_gb           = 500
     spot                   = false
     preemptible            = false
     enable_gcfs            = false
@@ -34,16 +34,23 @@ locals {
     logging_variant        = "DEFAULT"
     monitoring_variant     = "DEFAULT"
     create_service_account = false
-    service_account        = google_service_account.gke_nodes.email
+    service_account        = local.gke_nodes_service_account_email
   }
 
   # CPU-specific configuration
   cpu_config = {
-    disk_type = "pd-standard"
+    disk_type = "pd-ssd"
   }
 
   # GPU-specific configuration
-  gpu_config = {
+  t4_gpu_config = {
+    disk_type          = "pd-ssd"
+    accelerator_count  = 1
+    accelerator_type   = "nvidia-tesla-t4"
+    gpu_driver_version = "LATEST"
+  }
+
+  l4_gpu_config = {
     disk_type          = "pd-ssd"
     accelerator_count  = 1
     accelerator_type   = "nvidia-l4"
@@ -70,15 +77,26 @@ locals {
     }, local.cpu_config),
 
     merge(local.base_node_pool, {
-      name         = "ondemand-gpu"
-      machine_type = "g2-standard-16"
-    }, local.gpu_config),
+      name         = "ondemand-gpu-t4"
+      machine_type = "n1-standard-16"
+    }, local.t4_gpu_config),
 
     merge(local.base_node_pool, {
-      name         = "spot-gpu"
+      name         = "spot-gpu-t4"
+      machine_type = "n1-standard-16"
+      spot         = true
+    }, local.t4_gpu_config),
+
+    merge(local.base_node_pool, {
+      name         = "ondemand-gpu-l4"
+      machine_type = "g2-standard-16"
+    }, local.l4_gpu_config),
+
+    merge(local.base_node_pool, {
+      name         = "spot-gpu-l4"
       machine_type = "g2-standard-16"
       spot         = true
-    }, local.gpu_config)
+    }, local.l4_gpu_config)
   ]
 
   # Common label configurations
@@ -120,6 +138,10 @@ locals {
 #trivy:ignore:avd-gcp-0059
 #trivy:ignore:avd-gcp-0056
 #trivy:ignore:avd-gcp-0051
+#trivy:ignore:avd-gcp-0057
+#trivy:ignore:avd-ksv-0106
+#trivy:ignore:AVD-KSV-0118
+#trivy:ignore:AVD-KSV-0110
 module "gke" {
   #checkov:skip=CKV_TF_1: "Ensure Terraform module sources use a commit hash"
 
@@ -129,9 +151,9 @@ module "gke" {
   version = "~>34.0"
 
   project_id = var.google_project_id
-  name       = var.cluster_name
+  name       = var.gke_cluster_name
   region     = var.google_region
-  zones      = [data.google_compute_zones.available.names[0]]
+  zones      = [data.google_compute_zones.available.names[0], data.google_compute_zones.available.names[1]]
 
   network           = google_compute_network.anyscale.name
   subnetwork        = google_compute_subnetwork.anyscale.name
@@ -183,7 +205,7 @@ module "gke" {
 
 # Create VPC Network
 resource "google_compute_network" "anyscale" {
-  name                    = "${var.cluster_name}-vpc"
+  name                    = "${var.gke_cluster_name}-vpc"
   auto_create_subnetworks = false
 }
 
@@ -193,42 +215,41 @@ resource "google_compute_subnetwork" "anyscale" {
   #checkov:skip=CKV_GCP_26: "Ensure that VPC Flow Logs is enabled for every subnet in a VPC Network"
   #checkov:skip=CKV_GCP_74: "Ensure that private_ip_google_access is enabled for Subnet"
 
-  name          = "${var.cluster_name}-subnet"
+  name          = "${var.gke_cluster_name}-subnet"
   ip_cidr_range = "10.0.0.0/16"
   network       = google_compute_network.anyscale.id
   region        = var.google_region
 
   secondary_ip_range {
-    range_name    = "${var.cluster_name}-subnet-pods"
+    range_name    = "${var.gke_cluster_name}-subnet-pods"
     ip_cidr_range = "10.1.0.0/16"
   }
 
   secondary_ip_range {
-    range_name    = "${var.cluster_name}-subnet-services"
+    range_name    = "${var.gke_cluster_name}-subnet-services"
     ip_cidr_range = "10.2.0.0/16"
   }
 }
 
-# Allow common external ingress traffic (HTTP, HTTPS, SSH, ICMP)
+# Allow common external ingress traffic (HTTPS, SSH, ICMP)
 resource "google_compute_firewall" "allow-common-ingress" {
-  #checkov:skip=CKV_GCP_106: "allow http port 80 access"
   #checkov:skip=CKV_GCP_2: "Ensure Google compute firewall ingress does not allow unrestricted ssh access"
 
-  name    = "${var.cluster_name}-allow-common-ingress"
+  name    = "${var.gke_cluster_name}-allow-common-ingress"
   network = google_compute_network.anyscale.name
 
   direction = "INGRESS"
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "443"] # SSH, HTTP, HTTPS
+    ports    = ["22", "443"] # SSH, HTTP, HTTPS
   }
 
   allow {
     protocol = "icmp"
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = var.ingress_cidr_ranges
 }
 
 # Allow all internal traffic within VPC.
@@ -236,7 +257,7 @@ resource "google_compute_firewall" "allow-common-ingress" {
 resource "google_compute_firewall" "allow-internal" {
   #checkov:skip=CKV2_GCP_12: "GCP compute firewall ingress allow access to all ports"
 
-  name    = "${var.cluster_name}-allow-internal"
+  name    = "${var.gke_cluster_name}-allow-internal"
   network = google_compute_network.anyscale.name
 
   direction = "INGRESS"

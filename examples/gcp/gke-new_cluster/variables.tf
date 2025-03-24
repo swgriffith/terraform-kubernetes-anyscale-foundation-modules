@@ -1,0 +1,148 @@
+# ---------------------------------------------------------------------------------------------------------------------
+# ENVIRONMENT VARIABLES
+# Define these secrets as environment variables
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# REQUIRED VARIABLES
+# These variables must be set when using this module.
+# ---------------------------------------------------------------------------------------------------------------------
+variable "google_region" {
+  description = <<-EOT
+    (Required) The Google region in which all resources will be created.
+
+    ex:
+    ```
+    google_region = "us-central1"
+    ```
+  EOT
+  type        = string
+}
+
+variable "google_project_id" {
+  description = <<-EOT
+    (Required) The Google Cloud Project ID
+
+    This value can be found in the Google Cloud Console under "Project info".
+
+    ex:
+    ```
+    google_project_id = "my-project-id"
+    ```
+  EOT
+  type        = string
+}
+
+# Used to create the AWS IAM role to assume for GCP Identity Federation
+variable "anyscale_org_id" {
+  description = <<-EOT
+    (Required) Anyscale Organization ID
+
+    This value can be found under "Organization settings" in the Anyscale Console.
+
+    ex:
+    ```
+    anyscale_org_id = "org_12345abcdefghijklmnop67890"
+    ```
+  EOT
+  type        = string
+  validation {
+    condition = (
+      length(var.anyscale_org_id) > 4 &&
+      substr(var.anyscale_org_id, 0, 4) == "org_"
+    )
+    error_message = "The anyscale_org_id value must start with \"org_\"."
+  }
+}
+
+# ------------------------------------------------------------------------------
+# OPTIONAL PARAMETERS
+# These variables have defaults, but may be overridden.
+# ------------------------------------------------------------------------------
+variable "anyscale_cloud_id" {
+  description = <<-EOT
+    (Optional) Anyscale Cloud ID
+
+    This value can be found under "Cloud settings" in the Anyscale Console This will be used for labeling resources.
+
+    ex:
+    ```
+    anyscale_cloud_id = "cld_12345abcdefghijklmnop67890"
+    ```
+  EOT
+  type        = string
+  default     = null
+  validation {
+    condition = (
+      var.anyscale_cloud_id == null ? true : (
+        length(var.anyscale_cloud_id) > 4 &&
+        substr(var.anyscale_cloud_id, 0, 4) == "cld_"
+      )
+    )
+    error_message = "The anyscale_cloud_id value must start with \"cld_\"."
+  }
+}
+
+variable "labels" {
+  description = <<-EOT
+    (Optional) A map of labels to all resources that accept labels.
+
+    ex:
+    ```
+    labels = {
+      "example" = true
+      "environment" = "example"
+    }
+    ```
+  EOT
+  type        = map(string)
+  default = {
+    "example" : true,
+    "environment" : "example"
+  }
+}
+
+variable "gke_cluster_name" {
+  description = <<-EOF
+    (Optional) GKE Cluster Name
+
+    The name of the GKE cluster to create.
+
+    ex:
+    ```
+    cluster_name = "anyscale-cluster"
+    ```
+  EOF
+  type        = string
+  default     = "anyscale-gke"
+}
+
+variable "ingress_cidr_ranges" {
+  description = <<-EOT
+    (Optional) The IPv4 CIDR blocks that allows access Anyscale clusters.
+
+    These are added to the firewall and allows port 443 (https) and 22 (ssh) access.
+
+    ex:
+    ```
+    ingress_cidr_ranges=["52.1.1.23/32","10.1.0.0/16"]
+    ```
+  EOT
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+
+variable "anyscale_k8s_namespace" {
+  description = <<-EOT
+    (Optional) The Anyscale namespace to deploy the workload
+
+    ex:
+    ```
+    anyscale_k8s_namespace = "anyscale-operator"
+    ```
+  EOT
+  type        = string
+  default     = "anyscale-operator"
+}

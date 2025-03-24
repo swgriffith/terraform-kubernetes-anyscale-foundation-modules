@@ -43,7 +43,7 @@ We use GitHub [Issues] to track community reported issues and missing features.
 
 ## Known Issues/Untested
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -69,15 +69,15 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | (Required) The cloud provider (aws or gcp)<br><br>ex:<pre>cloud_provider = "aws"</pre> | `string` | n/a | yes |
-| <a name="input_aws_controlplane_role_arn"></a> [aws\_controlplane\_role\_arn](#input\_aws\_controlplane\_role\_arn) | (Optional) The ARN of the AWS IAM role that will be used by the EKS cluster to access AWS services.<br><br>Required if `cloud_provider` is set to `aws`.<br><br>ex:<pre>aws_controlplane_role_arn = "arn:aws:iam::123456789012:role/my-eks-controlplane-role"</pre> | `string` | `null` | no |
-| <a name="input_aws_dataplane_role_arn"></a> [aws\_dataplane\_role\_arn](#input\_aws\_dataplane\_role\_arn) | (Optional) The ARN of the AWS IAM role that will be used by the EKS cluster to access AWS services.<br><br>Required if `cloud_provider` is set to `aws`.<br><br>ex:<pre>aws_dataplane_role_arn = "arn:aws:iam::123456789012:role/my-eks-dataplane-role"</pre> | `string` | `null` | no |
-| <a name="input_kubernetes_cluster_name"></a> [kubernetes\_cluster\_name](#input\_kubernetes\_cluster\_name) | (Optional) The name of the Kubernetes cluster.<br><br>ex:<pre>kubernetes_cluster_name = "my-cluster"</pre> | `string` | `null` | no |
+| <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | (Required) The cloud provider (aws or gcp)<br/><br/>ex:<pre>cloud_provider = "aws"</pre> | `string` | n/a | yes |
+| <a name="input_aws_controlplane_role_arn"></a> [aws\_controlplane\_role\_arn](#input\_aws\_controlplane\_role\_arn) | (Optional) The ARN of the AWS IAM role that will be used by the EKS cluster to access AWS services.<br/><br/>Required if `cloud_provider` is set to `aws`.<br/><br/>ex:<pre>aws_controlplane_role_arn = "arn:aws:iam::123456789012:role/my-eks-controlplane-role"</pre> | `string` | `null` | no |
+| <a name="input_aws_dataplane_role_arn"></a> [aws\_dataplane\_role\_arn](#input\_aws\_dataplane\_role\_arn) | (Optional) The ARN of the AWS IAM role that will be used by the EKS cluster to access AWS services.<br/><br/>Required if `cloud_provider` is set to `aws`.<br/><br/>ex:<pre>aws_dataplane_role_arn = "arn:aws:iam::123456789012:role/my-eks-dataplane-role"</pre> | `string` | `null` | no |
+| <a name="input_kubernetes_cluster_name"></a> [kubernetes\_cluster\_name](#input\_kubernetes\_cluster\_name) | (Optional) The name of the Kubernetes cluster.<br/><br/>ex:<pre>kubernetes_cluster_name = "my-cluster"</pre> | `string` | `null` | no |
 
 ## Outputs
 
 No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- References -->
 [Terraform]: https://www.terraform.io

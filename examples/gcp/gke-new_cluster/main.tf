@@ -7,6 +7,9 @@
 #     - Filestore
 # ---------------------------------------------------------------------------------------------------------------------
 locals {
+  gke_nodes_service_account_name  = "${var.gke_cluster_name}-nodes"
+  gke_nodes_service_account_email = "${local.gke_nodes_service_account_name}@${var.google_project_id}.iam.gserviceaccount.com"
+
   full_labels = merge(tomap({
     anyscale-cloud-id = var.anyscale_cloud_id,
     }),
@@ -24,7 +27,7 @@ module "anyscale_cloudstorage" {
     "serviceAccount:${google_service_account.gke_nodes.email}"
   ]
 
-  bucket_force_destroy = true
+  bucket_force_destroy = false # Set to true to delete non-empty bucket
   anyscale_project_id  = var.google_project_id
   labels               = local.full_labels
 }
@@ -52,7 +55,7 @@ module "anyscale_filestore" {
 
 # Create GKE node service account
 resource "google_service_account" "gke_nodes" {
-  account_id   = "${var.cluster_name}-gke-nodes"
+  account_id   = local.gke_nodes_service_account_name
   display_name = "Service Account for GKE nodes"
   project      = var.google_project_id
 }
@@ -66,7 +69,7 @@ resource "google_project_iam_member" "gke_nodes_roles" {
   for_each = toset([
     "roles/storage.objectViewer",           # Access to GCS buckets
     "roles/file.editor",                    # Access to Filestore
-    "roles/iam.serviceAccountTokenCreator", # Generate presigned URL for GCS
+    "roles/iam.serviceAccountTokenCreator", # Generate presigned URL for Google Cloud Storage
     "roles/logging.logWriter",              # Write logs
     "roles/monitoring.metricWriter",        # Write metrics
     "roles/monitoring.viewer",              # Read metrics
@@ -76,4 +79,10 @@ resource "google_project_iam_member" "gke_nodes_roles" {
   project = var.google_project_id
   role    = each.key
   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
+}
+
+resource "google_service_account_iam_binding" "workload_identity_bindings" {
+  role               = "roles/iam.workloadIdentityUser"
+  service_account_id = google_service_account.gke_nodes.id
+  members            = ["serviceAccount:${var.google_project_id}.svc.id.goog[${var.anyscale_k8s_namespace}/anyscale-operator]"]
 }
