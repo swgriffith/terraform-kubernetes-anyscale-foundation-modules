@@ -29,21 +29,21 @@ requirements.
 Steps for deploying Anyscale resources via Terraform:
 
 1. Review variables.tf and (optionally) create a `terraform.tfvars` file with required variables:
-   * Your Anyscale Organization ID can be found under Organization Settings.
+    * Your Anyscale Organization ID can be found under Organization Settings.
 
-```tf
-anyscale_org_id = "<your_anyscale_org_id>"
-google_project_id = "<your_project_id>"
-google_region = "<your_google_region>"
-```
+    ```tf
+    anyscale_org_id = "<your_anyscale_org_id>"
+    google_project_id = "<your_project_id>"
+    google_region = "<your_google_region>"
+    ```
 
 1. Apply the terraform:
 
-```shell
-terraform init
-terraform plan
-terraform apply
-```
+    ```shell
+    terraform init
+    terraform plan
+    terraform apply
+    ```
 
 If you are using a `tfvars` file, you will need to update the above commands accordingly.
 Note the output from Terraform which includes an example cloud registration command you will use below.
@@ -63,40 +63,40 @@ Sample files, `sample-values_nginx_gke_private.yaml` and `sample-values_nginx_gk
 
 1. Choose if the cluster should be public or private facing.
 2. If public, create a YAML values file named `values_nginx_gke_public.yaml`
-   * Add the following:
-```yaml
-controller:
-  service:
-    type: LoadBalancer
-    annotations:
-      cloud.google.com/load-balancer-type: "External"
-  allowSnippetAnnotations: true
-  autoscaling:
-    enabled: true
-```
+    * Add the following:
+    ```yaml
+    controller:
+      service:
+        type: LoadBalancer
+        annotations:
+          cloud.google.com/load-balancer-type: "External"
+      allowSnippetAnnotations: true
+      autoscaling:
+        enabled: true
+    ```
 3. If private, create a YAML values file named `values_nginx_gke_private.yaml`
-   * Add the following:
-```yaml
-controller:
-  service:
-    type: LoadBalancer
-    annotations:
-      cloud.google.com/load-balancer-type: "Internal"
-  allowSnippetAnnotations: true
-  autoscaling:
-    enabled: true
-```
+    * Add the following:
+    ```yaml
+    controller:
+      service:
+        type: LoadBalancer
+        annotations:
+          cloud.google.com/load-balancer-type: "Internal"
+      allowSnippetAnnotations: true
+      autoscaling:
+        enabled: true
+    ```
 4. Run the following, replacing with the appropriate values file:
 
-```shell
-helm repo add nginx https://kubernetes.github.io/ingress-nginx
-helm upgrade ingress-nginx nginx/ingress-nginx \
-  --version 4.12.0 \
-  --namespace ingress-nginx \
-  --values values_nginx_gke_<private|public>.yaml \
-  --create-namespace \
-  --install
-```
+    ```shell
+    helm repo add nginx https://kubernetes.github.io/ingress-nginx
+    helm upgrade ingress-nginx nginx/ingress-nginx \
+      --version 4.12.0 \
+      --namespace ingress-nginx \
+      --values values_nginx_gke_<private|public>.yaml \
+      --create-namespace \
+      --install
+    ```
 
 ### Register the Anyscale Cloud
 
@@ -126,34 +126,33 @@ anyscale cloud register \
 ### Install the Anyscale Operator
 
 1. Using the below example, replace `<gke_region>` with the GCP region where GKE is running, replace `<service_account_email>` with the Google Cloud service account email, and replace `<cloud_deployment_id>` with the appropriate value from the `anyscale cloud register` output. Please note that you can also change the namespace to one that you wish to associate with Anyscale pods.
-2. Using your updated helm upgrade command, install the Anyscale Operator.
-3.
-4. Install the Anyscale Operator using the cloud deployment ID from the previous step:
+1. Using your updated helm upgrade command, install the Anyscale Operator.
+1. Install the Anyscale Operator using the cloud deployment ID from the previous step:
 
-```shell
-helm repo add anyscale https://anyscale.github.io/helm-charts
-helm upgrade anyscale-operator anyscale/anyscale-operator \
-  --set-string cloudDeploymentId=<cloud_deployment_id> \
-  --set-string cloudProvider=gcp \
-  --set-string region=<gke_region> \
-  --set-string operatorIamIdentity=<service_account_email> \
-  --set-string workloadServiceAccountName=anyscale-operator \
-  --namespace anyscale-operator \
-  --create-namespace \
-  --install
-```
+    ```shell
+    helm repo add anyscale https://anyscale.github.io/helm-charts
+    helm upgrade anyscale-operator anyscale/anyscale-operator \
+      --set-string cloudDeploymentId=<cloud_deployment_id> \
+      --set-string cloudProvider=gcp \
+      --set-string region=<gke_region> \
+      --set-string operatorIamIdentity=<service_account_email> \
+      --set-string workloadServiceAccountName=anyscale-operator \
+      --namespace anyscale-operator \
+      --create-namespace \
+      --install
+    ```
 
-2. (Optional) For the L4 GPU instances (`g2-standard-16`) to work, modify the Anyscale Operator `instance-types` ConfigMap:
-```
-  instance_types.yaml: |-
-    ...
-    8CPU-32GB-1xL4:
-      resources:
-        CPU: 8
-        GPU: 1
-        accelerator_type:L4: 1
-        memory: 32Gi
-```
+1. (Optional) For the L4 GPU instances (`g2-standard-16`) to work, modify the Anyscale Operator `instance-types` ConfigMap:
+    ```
+      instance_types.yaml: |-
+        ...
+        8CPU-32GB-1xL4:
+          resources:
+            CPU: 8
+            GPU: 1
+            accelerator_type:L4: 1
+            memory: 32Gi
+    ```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
