@@ -1,5 +1,6 @@
 # Local .terraform directories
 .terraform
+terraform.tfvars
 
 # Terraform lockfile
 .terraform.lock.hcl
@@ -38,4 +39,6 @@ terraform.rc
 
 .DS_Store
 
-example-anyscale-cloud-register.sh
+.tmp
+
+example*.sh

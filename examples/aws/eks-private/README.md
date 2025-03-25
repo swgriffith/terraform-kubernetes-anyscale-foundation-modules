@@ -54,7 +54,7 @@ helm upgrade cluster-autoscaler autoscaler/cluster-autoscaler \
   --version 9.46.0 \
   --namespace kube-system \
   --set awsRegion=<aws_region> \
-  --set 'autoDiscovery.clusterName'=<eks_cluster_name>
+  --set 'autoDiscovery.clusterName'=<eks_cluster_name> \
   --install
 ```
 

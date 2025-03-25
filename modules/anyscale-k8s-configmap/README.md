@@ -11,7 +11,7 @@ This module creates Kubernetes Configmaps for Anyscale applications and workload
 The `instance-types` ConfigMap defines the instance types that you wish to run on Anyscale. This ConfigMap can also be created
 via the Anyscale Helm Chart.
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -39,17 +39,17 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_anyscale_kubernetes_namespace"></a> [anyscale\_kubernetes\_namespace](#input\_anyscale\_kubernetes\_namespace) | (Optional) The namespace to install the Anyscale resources.<br><br>ex:<pre>anyscale_kubernetes_namespace = "anyscale-k8s"</pre> | `string` | n/a | yes |
-| <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | (Required) The cloud provider (aws or gcp)<br><br>ex:<pre>cloud_provider = "aws"</pre> | `string` | n/a | yes |
-| <a name="input_anyscale_instance_types"></a> [anyscale\_instance\_types](#input\_anyscale\_instance\_types) | (Optional) A list of instance types to create in the instance-types configmap.<br><br>ex:<pre>anyscale_instance_types = [<br>  {<br>    instanceType = "8CPU-32GB"<br>    CPU          = 8<br>    memory       = 32Gi # 32gb<br>  },<br>  {<br>    instanceType = "4CPU-16GB-1xA10"<br>    CPU          = 4<br>    GPU          = 1<br>    memory       = 17179869184 # 16gb converted to bytes<br>    accelerator_type = {"A10G" = 1}<br>  },<br>  {<br>    instanceType = "8CPU-32GB-1xA10"<br>    CPU          = 8<br>    GPU          = 1<br>    memory       = 32Gi # 32gb<br>    accelerator_type = {"A10G" = 1}<br>  },<br>  {<br>    instanceType = "8CPU-32GB-1xT4"<br>    CPU          = 8<br>    GPU          = 1<br>    memory       = 32Gi # 32gb<br>    accelerator_type = {"T4" = 1}<br>  }<br>]</pre> | <pre>list(object({<br>    instanceType     = string<br>    CPU              = number<br>    GPU              = optional(number)<br>    memory           = string<br>    accelerator_type = optional(map(number)) # accelerator_type should be a map of key-value pairs<br>  }))</pre> | <pre>[<br>  {<br>    "CPU": 8,<br>    "instanceType": "8CPU-32GB",<br>    "memory": "32Gi"<br>  }<br>]</pre> | no |
-| <a name="input_anyscale_instance_types_version"></a> [anyscale\_instance\_types\_version](#input\_anyscale\_instance\_types\_version) | (Optional) The version of the instance-types configmap.<br><br>ex:<pre>anyscale_instance_types_version = "v1"</pre> | `string` | `"v1"` | no |
-| <a name="input_create_anyscale_instance_types_map"></a> [create\_anyscale\_instance\_types\_map](#input\_create\_anyscale\_instance\_types\_map) | (Optional) Determines if the instance-types configmap should be created.<br><br>ex:<pre>create_anyscale_instance_types_map = true</pre> | `bool` | `true` | no |
-| <a name="input_module_enabled"></a> [module\_enabled](#input\_module\_enabled) | (Optional) Determines if this module should create resources.<br><br>If set to true, `eks_role_arn`, `anyscale_subnet_ids`, and `anyscale_security_group_id` must be provided.<br>ex:<pre>module_enabled = true</pre> | `bool` | `false` | no |
+| <a name="input_anyscale_kubernetes_namespace"></a> [anyscale\_kubernetes\_namespace](#input\_anyscale\_kubernetes\_namespace) | (Optional) The namespace to install the Anyscale resources.<br/><br/>ex:<pre>anyscale_kubernetes_namespace = "anyscale-k8s"</pre> | `string` | n/a | yes |
+| <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | (Required) The cloud provider (aws or gcp)<br/><br/>ex:<pre>cloud_provider = "aws"</pre> | `string` | n/a | yes |
+| <a name="input_anyscale_instance_types"></a> [anyscale\_instance\_types](#input\_anyscale\_instance\_types) | (Optional) A list of instance types to create in the instance-types configmap.<br/><br/>ex:<pre>anyscale_instance_types = [<br/>  {<br/>    instanceType = "8CPU-32GB"<br/>    CPU          = 8<br/>    memory       = 32Gi # 32gb<br/>  },<br/>  {<br/>    instanceType = "4CPU-16GB-1xA10"<br/>    CPU          = 4<br/>    GPU          = 1<br/>    memory       = 17179869184 # 16gb converted to bytes<br/>    accelerator_type = {"A10G" = 1}<br/>  },<br/>  {<br/>    instanceType = "8CPU-32GB-1xA10"<br/>    CPU          = 8<br/>    GPU          = 1<br/>    memory       = 32Gi # 32gb<br/>    accelerator_type = {"A10G" = 1}<br/>  },<br/>  {<br/>    instanceType = "8CPU-32GB-1xT4"<br/>    CPU          = 8<br/>    GPU          = 1<br/>    memory       = 32Gi # 32gb<br/>    accelerator_type = {"T4" = 1}<br/>  }<br/>]</pre> | <pre>list(object({<br/>    instanceType     = string<br/>    CPU              = number<br/>    GPU              = optional(number)<br/>    memory           = string<br/>    accelerator_type = optional(map(number)) # accelerator_type should be a map of key-value pairs<br/>  }))</pre> | <pre>[<br/>  {<br/>    "CPU": 8,<br/>    "instanceType": "8CPU-32GB",<br/>    "memory": "32Gi"<br/>  }<br/>]</pre> | no |
+| <a name="input_anyscale_instance_types_version"></a> [anyscale\_instance\_types\_version](#input\_anyscale\_instance\_types\_version) | (Optional) The version of the instance-types configmap.<br/><br/>ex:<pre>anyscale_instance_types_version = "v1"</pre> | `string` | `"v1"` | no |
+| <a name="input_create_anyscale_instance_types_map"></a> [create\_anyscale\_instance\_types\_map](#input\_create\_anyscale\_instance\_types\_map) | (Optional) Determines if the instance-types configmap should be created.<br/><br/>ex:<pre>create_anyscale_instance_types_map = true</pre> | `bool` | `true` | no |
+| <a name="input_module_enabled"></a> [module\_enabled](#input\_module\_enabled) | (Optional) Determines if this module should create resources.<br/><br/>If set to true, `eks_role_arn`, `anyscale_subnet_ids`, and `anyscale_security_group_id` must be provided.<br/>ex:<pre>module_enabled = true</pre> | `bool` | `false` | no |
 
 ## Outputs
 
 No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- References -->
 [Terraform]: https://www.terraform.io
