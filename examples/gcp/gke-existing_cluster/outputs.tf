@@ -5,13 +5,16 @@ data "google_container_cluster" "existing_gke_cluster" {
 }
 
 locals {
+  # If node_locations is empty (zonal cluster), use the cluster's location
+  cluster_zones = length(data.google_container_cluster.existing_gke_cluster.node_locations) > 0 ? data.google_container_cluster.existing_gke_cluster.node_locations : [var.existing_gke_cluster_location]
+
   registration_command_parts = compact([
     "anyscale cloud register",
     "--name <anyscale_cloud_name>",
     "--provider gcp",
     "--region ${var.google_region}",
     "--compute-stack k8s",
-    "--kubernetes-zones ${join(",", data.google_container_cluster.existing_gke_cluster.node_locations)}",
+    "--kubernetes-zones ${join(",", local.cluster_zones)}",
     "--anyscale-operator-iam-identity ${google_service_account.gke_nodes.email}",
     "--cloud-storage-bucket-name ${module.anyscale_cloudstorage.cloudstorage_bucket_name}",
     "--project-id ${var.google_project_id}",
