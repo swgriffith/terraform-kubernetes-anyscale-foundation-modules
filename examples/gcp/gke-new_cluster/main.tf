@@ -27,6 +27,8 @@ module "anyscale_cloudstorage" {
     "serviceAccount:${google_service_account.gke_nodes.email}"
   ]
 
+  anyscale_bucket_name = "${var.gke_cluster_name}-bucket"
+
   bucket_force_destroy = false # Set to true to delete non-empty bucket
   anyscale_project_id  = var.google_project_id
   labels               = local.full_labels
@@ -67,7 +69,7 @@ resource "google_project_iam_member" "gke_nodes_roles" {
   #checkov:skip=CKV_GCP_49: "impersonate or manage Service Accounts used at project level"
 
   for_each = toset([
-    "roles/storage.objectViewer",           # Access to GCS buckets
+    "roles/storage.admin",                  # Access to GCS buckets
     "roles/file.editor",                    # Access to Filestore
     "roles/iam.serviceAccountTokenCreator", # Generate presigned URL for Google Cloud Storage
     "roles/logging.logWriter",              # Write logs
