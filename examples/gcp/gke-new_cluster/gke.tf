@@ -100,7 +100,13 @@ locals {
   ]
 
   # Common label configurations
-  gpu_node_labels = {
+  gpu_t4_node_labels = {
+    "nvidia.com/gpu.product" = "nvidia-tesla-t4"
+    "nvidia.com/gpu.count"   = "1"
+  }
+
+  # Common label configurations
+  gpu_l4_node_labels = {
     "nvidia.com/gpu.product" = "nvidia-l4"
     "nvidia.com/gpu.count"   = "1"
   }
@@ -179,9 +185,13 @@ module "gke" {
   node_pools_labels = {
     all = {}
 
-    "ondemand-gpu" = local.gpu_node_labels
+    "ondemand-gpu-t4" = local.gpu_t4_node_labels
 
-    "spot-gpu" = local.gpu_node_labels
+    "spot-gpu-t4" = local.gpu_t4_node_labels
+
+    "ondemand-gpu-l4" = local.gpu_l4_node_labels
+
+    "spot-gpu-l4" = local.gpu_l4_node_labels
   }
 
   node_pools_taints = {
@@ -191,12 +201,22 @@ module "gke" {
 
     "spot-cpu" = [local.capacity_type_taint.spot]
 
-    "ondemand-gpu" = concat(
+    "ondemand-gpu-t4" = concat(
       [local.capacity_type_taint.on_demand],
       local.gpu_taints
     )
 
-    "spot-gpu" = concat(
+    "spot-gpu-t4" = concat(
+      [local.capacity_type_taint.spot],
+      local.gpu_taints
+    )
+
+    "ondemand-gpu-l4" = concat(
+      [local.capacity_type_taint.on_demand],
+      local.gpu_taints
+    )
+
+    "spot-gpu-l4" = concat(
       [local.capacity_type_taint.spot],
       local.gpu_taints
     )
