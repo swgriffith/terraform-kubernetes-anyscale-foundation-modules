@@ -141,7 +141,7 @@ tolerations:
 helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
 helm upgrade nvdp nvdp/nvidia-device-plugin \
   --namespace nvidia-device-plugin \
-  --version 0.17.0 \
+  --version 0.17.1 \
   --values values_nvdp.yaml \
   --create-namespace \
   --install
