@@ -29,3 +29,19 @@ variable "anyscale_operator_namespace" {
   type        = string
   default     = "anyscale-operator"
 }
+
+variable "node_group_gpu_types" {
+  description = <<-EOT
+    (Optional) The GPU types of the AKS nodes.
+    Possible values: ["T4", "A10", "A100", "H100"]
+  EOT
+  type        = list(string)
+  default     = ["T4"]
+
+  validation {
+    condition = alltrue(
+      [for g in var.node_group_gpu_types : contains(["T4", "A10", "A100", "H100"], g)]
+    )
+    error_message = "GPU type must be one of: T4, A10, A100, H100."
+  }
+}
