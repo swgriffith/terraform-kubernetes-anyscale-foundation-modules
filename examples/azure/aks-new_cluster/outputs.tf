@@ -37,7 +37,7 @@ locals {
     "helm upgrade anyscale-operator anyscale/anyscale-operator",
     "--set-string anyscaleCliToken=<anyscale-cli-token>",
     "--set-string cloudDeploymentId=<cloud-deployment-id>",
-    "--set-string cloudProvider=generic",
+    "--set-string cloudProvider=azure",
     "--set-string operatorIamIdentity=${azurerm_user_assigned_identity.anyscale_operator.client_id}",
     "--set-string workloadServiceAccountName=anyscale-operator",
     "--set operatorExcludeComponentVerification={STORAGE_BUCKET}",
