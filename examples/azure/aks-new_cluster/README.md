@@ -132,7 +132,7 @@ helm repo update
 
 helm upgrade anyscale-operator anyscale/anyscale-operator \
 --set-string cloudDeploymentId=<cloud-deployment-id> \
---set-string cloudProvider=generic \
+--set-string cloudProvider=azure \
 --set-string anyscaleCliToken=<anyscale-cli-token> \
 --set-string operatorIamIdentity=<anyscale_operator_client_id> \
 --set operatorExcludeComponentVerification={STORAGE_BUCKET} \
