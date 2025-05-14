@@ -40,7 +40,6 @@ locals {
     "--set-string cloudProvider=azure",
     "--set-string operatorIamIdentity=${azurerm_user_assigned_identity.anyscale_operator.client_id}",
     "--set-string workloadServiceAccountName=anyscale-operator",
-    "--set operatorExcludeComponentVerification={STORAGE_BUCKET}",
     "--namespace ${var.anyscale_operator_namespace}",
     "--create-namespace",
     "-i"

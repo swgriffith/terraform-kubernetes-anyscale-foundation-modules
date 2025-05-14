@@ -135,7 +135,6 @@ helm upgrade anyscale-operator anyscale/anyscale-operator \
 --set-string cloudProvider=azure \
 --set-string anyscaleCliToken=<anyscale-cli-token> \
 --set-string operatorIamIdentity=<anyscale_operator_client_id> \
---set operatorExcludeComponentVerification={STORAGE_BUCKET} \
 --set-string workloadServiceAccountName=anyscale-operator \
 --namespace anyscale-operator \
 --create-namespace \
