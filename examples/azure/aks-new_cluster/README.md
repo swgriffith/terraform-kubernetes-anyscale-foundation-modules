@@ -31,7 +31,7 @@ terraform apply
 ```
 
 If you are using a `tfvars` file, you will need to update the above commands accordingly.
-Note the output from Terraform which includes an example cloud registration command you will use below.
+Note the output from Terraform which includes example cloud registration and helm commands you will use below.
 
 ### Install the Kubernetes Requirements
 
@@ -123,7 +123,7 @@ Output
 
 ### Install the Anyscale Operator
 
-Run the below commands, replace `<cloud-deployment-id>` with the appropriate value from the `anyscale cloud register` output. Please keep `{STORAGE_BUCKET}` as is.
+Using the output from the Terraform modules, install the Anyscale Operator on the AKS Cluster. It should look someting like:
 
 ```shell
 
