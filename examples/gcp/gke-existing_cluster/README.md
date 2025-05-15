@@ -211,6 +211,7 @@ anyscale cloud register \
 |------|-------------|
 | <a name="output_anyscale_operator_service_account_email"></a> [anyscale\_operator\_service\_account\_email](#output\_anyscale\_operator\_service\_account\_email) | The Anyscale operator service account email. |
 | <a name="output_anyscale_registration_command"></a> [anyscale\_registration\_command](#output\_anyscale\_registration\_command) | The Anyscale registration command. |
+| <a name="output_helm_upgrade_command"></a> [helm\_upgrade\_command](#output\_helm\_upgrade\_command) | The helm upgrade command. |
 <!-- END_TF_DOCS -->
 
 <!-- References -->

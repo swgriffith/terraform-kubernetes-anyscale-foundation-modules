@@ -51,7 +51,6 @@ output "anyscale_registration_command" {
   value       = join(" \\\n\t", local.registration_command_parts)
 }
 
-
 output "helm_upgrade_command" {
   description = "The helm upgrade command."
   value       = join(" \\\n\t", local.helm_upgrade_command_parts)
