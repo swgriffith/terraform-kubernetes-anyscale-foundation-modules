@@ -136,7 +136,7 @@ tolerations:
 helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
 helm upgrade nvdp nvdp/nvidia-device-plugin \
   --namespace nvidia-device-plugin \
-  --version 0.17.0 \
+  --version 0.17.1 \
   --values values_nvdp.yaml \
   --create-namespace \
   --install
@@ -173,12 +173,12 @@ Output
 
 ```shell
 helm repo add anyscale https://anyscale.github.io/helm-charts
-helm upgrade anyscale-private anyscale/anyscale-operator \
+helm upgrade anyscale-operator anyscale/anyscale-operator \
   --set-string cloudDeploymentId=<cloud-deployment-id> \
   --set-string cloudProvider=aws \
   --set-string region=<aws_region> \
   --set-string workloadServiceAccountName=anyscale-operator \
-  --namespace anyscale-private \
+  --namespace anyscale-operator \
   --create-namespace \
   --install
 ```
@@ -230,9 +230,10 @@ helm upgrade anyscale-private anyscale/anyscale-operator \
 
 | Name | Description |
 |------|-------------|
-| <a name="output_anyscale_register_command"></a> [anyscale\_register\_command](#output\_anyscale\_register\_command) | Anyscale register command.<br>This output can be used with the Anyscale CLI to register a new Anyscale Cloud.<br>You will need to replace `<CUSTOMER_DEFINED_NAME>` with a name of your choosing before running the Anyscale CLI command. |
+| <a name="output_anyscale_registration_command"></a> [anyscale\_registration\_command](#output\_anyscale\_registration\_command) | The Anyscale registration command. |
 | <a name="output_aws_region"></a> [aws\_region](#output\_aws\_region) | The AWS region. This is used for Helm chart values. |
 | <a name="output_eks_cluster_name"></a> [eks\_cluster\_name](#output\_eks\_cluster\_name) | The name of the EKS cluster. This is used for Helm chart values. |
+| <a name="output_helm_upgrade_command"></a> [helm\_upgrade\_command](#output\_helm\_upgrade\_command) | The helm upgrade command. |
 <!-- END_TF_DOCS -->
 
 <!-- References -->

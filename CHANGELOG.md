@@ -1,3 +1,84 @@
+## 0.4.0 (Released)
+FEATURES:
+- Add Azure example for new AKS cluster
+
+BUG FIXES:
+
+BREAKING CHANGES:
+
+NOTES:
+
+## 0.3.5 (Released)
+FEATURES:
+- Add node_group_gpu_types option to dynamically define GPU nodegroups
+
+BUG FIXES:
+
+BREAKING CHANGES:
+
+NOTES:
+
+## 0.3.4 (Released)
+FEATURES:
+
+BUG FIXES:
+- Fix gpu t4/l4 labels and taints
+
+BREAKING CHANGES:
+
+NOTES:
+
+## 0.3.3 (Released)
+FEATURES:
+
+BUG FIXES:
+- Fix node_location to work with zonal gke cluster
+
+BREAKING CHANGES:
+
+NOTES:
+
+## 0.3.2 (Released)
+FEATURES:
+
+BUG FIXES:
+- Add validation to gke_cluster_name
+
+BREAKING CHANGES:
+
+NOTES:
+
+## 0.3.1 (Released)
+FEATURES:
+
+BUG FIXES:
+
+BREAKING CHANGES:
+- Refactor of gke examples
+
+NOTES:
+
+## 0.3.0 (Released)
+FEATURES:
+- Update GKE Example to make Filestore optional
+
+BUG FIXES:
+
+BREAKING CHANGES:
+
+NOTES:
+
+## 0.2.2 (Released)
+FEATURES:
+
+BUG FIXES:
+- GKE new_cluster - Add implicit depends_on for IAM binding
+
+BREAKING CHANGES:
+
+
+NOTES:
+
 ## 0.2.1 (Released)
 FEATURES:
 - New example for deploying Anyscale Operator on a new GKE cluster

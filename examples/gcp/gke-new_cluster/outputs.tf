@@ -13,6 +13,18 @@ locals {
     var.enable_filestore ? "--file-storage-id ${module.anyscale_filestore.anyscale_filestore_name}" : "",
     var.enable_filestore ? "--filestore-location ${module.anyscale_filestore.anyscale_filestore_location}" : ""
   ])
+
+  helm_upgrade_command_parts = compact([
+    "helm upgrade anyscale-operator anyscale/anyscale-operator",
+    "--set-string cloudDeploymentId=<cloud-deployment-id>",
+    "--set-string cloudProvider=gcp",
+    "--set-string region=${var.google_region}",
+    "--set-string operatorIamIdentity=${google_service_account.gke_nodes.email}",
+    "--set-string workloadServiceAccountName=anyscale-operator",
+    "--namespace ${var.anyscale_k8s_namespace}",
+    "--create-namespace",
+    "-i"
+  ])
 }
 
 output "anyscale_registration_command" {
@@ -23,4 +35,9 @@ output "anyscale_registration_command" {
 output "anyscale_operator_service_account_email" {
   description = "The Anyscale operator service account email."
   value       = google_service_account.gke_nodes.email
+}
+
+output "helm_upgrade_command" {
+  description = "The helm upgrade command."
+  value       = join(" \\\n\t", local.helm_upgrade_command_parts)
 }

@@ -7,20 +7,37 @@ locals {
   kubernetes_zones = join(",", [for s in data.aws_subnet.existing : s.availability_zone])
 }
 
-output "anyscale_register_command" {
-  description = <<-EOF
-    Anyscale register command.
-    This output can be used with the Anyscale CLI to register a new Anyscale Cloud.
-    You will need to replace `<CUSTOMER_DEFINED_NAME>` with a name of your choosing before running the Anyscale CLI command.
-  EOF
-  value       = <<-EOT
-    anyscale cloud register --provider aws \
-      --name <CUSTOMER_DEFINED_NAME> \
-      --compute-stack k8s \
-      --region ${var.aws_region} \
-      --s3-bucket-id ${module.anyscale_s3.s3_bucket_id} \
-      --efs-id ${module.anyscale_efs.efs_id} \
-      --kubernetes-zones ${local.kubernetes_zones} \
-      --anyscale-operator-iam-identity <node_IAM_role_arn>
-  EOT
+locals {
+  registration_command_parts = compact([
+    "anyscale cloud register",
+    "--name <anyscale_cloud_name>",
+    "--region ${var.aws_region}",
+    "--provider aws",
+    "--compute-stack k8s",
+    "--kubernetes-zones ${local.kubernetes_zones}",
+    "--s3-bucket-id ${module.anyscale_s3.s3_bucket_id}",
+    "--efs-id ${module.anyscale_efs.efs_id}",
+    "--anyscale-operator-iam-identity <node_IAM_role_arn>",
+  ])
+
+  helm_upgrade_command_parts = compact([
+    "helm upgrade anyscale-operator anyscale/anyscale-operator",
+    "--set-string cloudDeploymentId=<cloud-deployment-id>",
+    "--set-string cloudProvider=aws",
+    "--set-string region=${var.aws_region}",
+    "--set-string workloadServiceAccountName=anyscale-operator",
+    "--namespace anyscale-operator",
+    "--create-namespace",
+    "-i"
+  ])
+}
+
+output "anyscale_registration_command" {
+  description = "The Anyscale registration command."
+  value       = join(" \\\n\t", local.registration_command_parts)
+}
+
+output "helm_upgrade_command" {
+  description = "The helm upgrade command."
+  value       = join(" \\\n\t", local.helm_upgrade_command_parts)
 }

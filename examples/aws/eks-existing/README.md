@@ -141,7 +141,7 @@ tolerations:
 helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
 helm upgrade nvdp nvdp/nvidia-device-plugin \
   --namespace nvidia-device-plugin \
-  --version 0.17.0 \
+  --version 0.17.1 \
   --values values_nvdp.yaml \
   --create-namespace \
   --install
@@ -178,12 +178,12 @@ Output
 
 ```shell
 helm repo add anyscale https://anyscale.github.io/helm-charts
-helm upgrade anyscale-private anyscale/anyscale-operator \
+helm upgrade anyscale-operator anyscale/anyscale-operator \
   --set-string cloudDeploymentId=<cloud-deployment-id> \
   --set-string cloudProvider=aws \
   --set-string region=<aws_region> \
   --set-string workloadServiceAccountName=anyscale-operator \
-  --namespace anyscale-private \
+  --namespace anyscale-operator \
   --create-namespace \
   --install
 ```
@@ -221,17 +221,18 @@ helm upgrade anyscale-private anyscale/anyscale-operator \
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_customer_ingress_cidr_ranges"></a> [customer\_ingress\_cidr\_ranges](#input\_customer\_ingress\_cidr\_ranges) | The IPv4 CIDR block that is allowed to access the clusters.<br/>This provides the ability to lock down the v1 stack to just the public IPs of a corporate network.<br/>This is added to the security group and allows port 443 (https) and 22 (ssh) access.<br/>ex: `52.1.1.23/32,10.1.0.0/16'<br/>` | `string` | n/a | yes |
-| <a name="input_existing_subnet_ids"></a> [existing\_subnet\_ids](#input\_existing\_subnet\_ids) | (Required) Existing Subnet IDs.<br/>The IDs of existing subnets to use. This should not be the entire ARN of the subnet, just the ID.<br/>These subnets should be in the `existing_vpc_id`.<br/>ex:<pre>existing_subnet_ids = ["subnet-1234567890", "subnet-0987654321"]</pre> | `list(string)` | n/a | yes |
-| <a name="input_existing_vpc_id"></a> [existing\_vpc\_id](#input\_existing\_vpc\_id) | (Required) Existing VPC ID.<br/>The ID of an existing VPC to use. This should not be the entire ARN of the VPC, just the ID.<br/>ex:<pre>existing_vpc_id = "vpc-1234567890"</pre><pre></pre> | `string` | n/a | yes |
+| <a name="input_customer_ingress_cidr_ranges"></a> [customer\_ingress\_cidr\_ranges](#input\_customer\_ingress\_cidr\_ranges) | The IPv4 CIDR block that is allowed to access the clusters.<br>This provides the ability to lock down the v1 stack to just the public IPs of a corporate network.<br>This is added to the security group and allows port 443 (https) and 22 (ssh) access.<br>ex: `52.1.1.23/32,10.1.0.0/16'<br>` | `string` | n/a | yes |
+| <a name="input_existing_subnet_ids"></a> [existing\_subnet\_ids](#input\_existing\_subnet\_ids) | (Required) Existing Subnet IDs.<br>The IDs of existing subnets to use. This should not be the entire ARN of the subnet, just the ID.<br>These subnets should be in the `existing_vpc_id`.<br>ex:<pre>existing_subnet_ids = ["subnet-1234567890", "subnet-0987654321"]</pre> | `list(string)` | n/a | yes |
+| <a name="input_existing_vpc_id"></a> [existing\_vpc\_id](#input\_existing\_vpc\_id) | (Required) Existing VPC ID.<br>The ID of an existing VPC to use. This should not be the entire ARN of the VPC, just the ID.<br>ex:<pre>existing_vpc_id = "vpc-1234567890"</pre><pre></pre> | `string` | n/a | yes |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region in which all resources will be created. | `string` | `"us-east-2"` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | (Optional) A map of tags to all resources that accept tags. | `map(string)` | <pre>{<br/>  "Environment": "dev",<br/>  "Example": "aws/eks-existing",<br/>  "Repo": "terraform-kubernetes-anyscale-foundation-modules",<br/>  "Test": "true"<br/>}</pre> | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | (Optional) A map of tags to all resources that accept tags. | `map(string)` | <pre>{<br>  "Environment": "dev",<br>  "Example": "aws/eks-existing",<br>  "Repo": "terraform-kubernetes-anyscale-foundation-modules",<br>  "Test": "true"<br>}</pre> | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_anyscale_register_command"></a> [anyscale\_register\_command](#output\_anyscale\_register\_command) | Anyscale register command.<br/>This output can be used with the Anyscale CLI to register a new Anyscale Cloud.<br/>You will need to replace `<CUSTOMER_DEFINED_NAME>` with a name of your choosing before running the Anyscale CLI command. |
+| <a name="output_anyscale_registration_command"></a> [anyscale\_registration\_command](#output\_anyscale\_registration\_command) | The Anyscale registration command. |
+| <a name="output_helm_upgrade_command"></a> [helm\_upgrade\_command](#output\_helm\_upgrade\_command) | The helm upgrade command. |
 <!-- END_TF_DOCS -->
 
 <!-- References -->
