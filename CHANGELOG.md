@@ -1,12 +1,19 @@
-## 0.4.1 (Released)
+## 0.4.2 (Released)
 FEATURES:
-- Update Azure example for latest Anyscale CLI.
 
 BUG FIXES:
 
 BREAKING CHANGES:
 
 NOTES:
+- Update Azure example README title
+
+BUG FIXES:
+
+BREAKING CHANGES:
+
+NOTES:
+- Update Azure example for latest Anyscale CLI.
 
 ## 0.4.0 (Released)
 FEATURES:
