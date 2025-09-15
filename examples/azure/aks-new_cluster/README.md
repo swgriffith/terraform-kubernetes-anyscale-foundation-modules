@@ -135,9 +135,9 @@ helm repo add anyscale https://anyscale.github.io/helm-charts
 helm repo update
 
 helm upgrade anyscale-operator anyscale/anyscale-operator \
---set-string anyscaleCliToken=<anyscale-cli-token> \
 --set-string cloudDeploymentId=<cloud-deployment-id> \
 --set-string cloudProvider=azure \
+--set-string region=<region> \
 --set-string operatorIamIdentity=<anyscale_operator_client_id> \
 --set-string workloadServiceAccountName=anyscale-operator \
 --namespace anyscale-operator \
