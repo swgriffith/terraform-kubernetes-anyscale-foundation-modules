@@ -27,7 +27,7 @@ Steps for deploying Anyscale resources via Terraform:
 ```shell
 # Variables
 SUBSCRIPTION_ID=12345678-1234-1234-1234-123456789012
-RESOURCE_GROUP=Anyscale-Lab-RG
+RESOURCE_GROUP=anyscale-lab-rg
 LOCATION=northcentralus
 CLUSTER_NAME=anyscale-aks
 STORAGE_ACCOUNT_NAME=anyscale$RANDOM
@@ -192,7 +192,7 @@ The above will likely fail due to some updates still in progress. We need to fix
 
 ```shell
 # Get the managed identity client id
-MI_CLIENT_ID=$(az identity show -g $RESOURCE_GROUP -n $CLUSTER_NAME-anyscale-operator-mi -o tsv --query clientId
+MI_CLIENT_ID=$(az identity show -g $RESOURCE_GROUP -n $CLUSTER_NAME-anyscale-operator-mi -o tsv --query clientId)
 
 kubectl patch sa anyscale-operator -n $ANYSCALE_NAMESPACE --type='json' -p="[{"op": "add", "path": "/metadata/annotations/azure.workload.identity~1client-id", "value": "$MI_CLIENT_ID"}]"
 
