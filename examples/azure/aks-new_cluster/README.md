@@ -148,6 +148,9 @@ You will need an Anyscale platform API Key for the helm chart installation. You 
 1. Using the output from the Terraform modules, register the Anyscale Cloud. It should look sonething like:
 
 ```shell
+# Anyscale API Key from the portal link above
+ANYSCALE_CLI_TOKEN=
+
 anyscale cloud register \
   --name $ANYSCALE_CLOUD_INSTANCE_NAME \
   --region $LOCATION \
@@ -173,6 +176,16 @@ helm repo add anyscale https://anyscale.github.io/helm-charts
 helm repo update
 
 helm upgrade anyscale-operator anyscale/anyscale-operator \
+--set-string global.cloudDeploymentId=cldrsrc_1p9ffm23hf8wk175pbq7gu1hj9 \
+--set-string global.cloudProvider=azure \
+--set-string global.auth.anyscaleCliToken=$ANYSCALE_CLI_TOKEN \
+--set-string workloads.serviceAccount.name=anyscale-operator \
+--namespace ${ANYSCALE_NAMESPACE} \
+--create-namespace \
+--wait \
+-i
+
+helm upgrade anyscale-operator anyscale/anyscale-operator \
 --set-string cloudDeploymentId=<cloud-deployment-id> \
 --set-string cloudProvider=azure \
 --set-string region=<region> \
@@ -182,6 +195,20 @@ helm upgrade anyscale-operator anyscale/anyscale-operator \
 --create-namespace \
 -i
 ```
+
+The above will likely fail due to some updates still in progress. We need to fix the service account used by the anyscale operator.
+
+```shell
+# Get the managed identity client id
+MI_CLIENT_ID=$(az identity show -g $RESOURCE_GROUP -n $CLUSTER_NAME-anyscale-operator-mi -o tsv --query clientId
+
+kubectl patch sa anyscale-operator -n $ANYSCALE_NAMESPACE --type='json' -p="[{"op": "add", "path": "/metadata/annotations/azure.workload.identity~1client-id", "value": "$MI_CLIENT_ID"}]"
+
+kubectl patch sa anyscale-operator -n $ANYSCALE_NAMESPACE --type='json' -p='[{"op": "add", "path": "/metadata/labels/azure.workload.identity~1use", "value": "true"}]'
+
+kubectl rollout restart deploy/anyscale-operator -n $ANYSCALE_NAMESPACE
+```
+
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
