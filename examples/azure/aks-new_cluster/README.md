@@ -156,8 +156,8 @@ anyscale cloud register \
   --region $LOCATION \
   --provider azure \
   --compute-stack k8s \
-  --cloud-storage-bucket-name 'azure://${STORAGE_CONTAINER_NAME}' \
-  --cloud-storage-bucket-endpoint 'https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net'
+  --cloud-storage-bucket-name "azure://${STORAGE_CONTAINER_NAME}" \
+  --cloud-storage-bucket-endpoint "https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net"
 ```
 
 2. Note the Cloud Deployment ID which will be used in the next step. The Anyscale CLI will return it as one of the outputs. Example:
@@ -175,8 +175,9 @@ Using the output from the Terraform modules, install the Anyscale Operator on th
 helm repo add anyscale https://anyscale.github.io/helm-charts
 helm repo update
 
+# Use the cloudDeploymentId from the output of the anyscale register command you ran above
 helm upgrade anyscale-operator anyscale/anyscale-operator \
---set-string global.cloudDeploymentId=cldrsrc_1p9ffm23hf8wk175pbq7gu1hj9 \
+--set-string global.cloudDeploymentId= \
 --set-string global.cloudProvider=azure \
 --set-string global.auth.anyscaleCliToken=$ANYSCALE_CLI_TOKEN \
 --set-string workloads.serviceAccount.name=anyscale-operator \
@@ -185,15 +186,6 @@ helm upgrade anyscale-operator anyscale/anyscale-operator \
 --wait \
 -i
 
-helm upgrade anyscale-operator anyscale/anyscale-operator \
---set-string cloudDeploymentId=<cloud-deployment-id> \
---set-string cloudProvider=azure \
---set-string region=<region> \
---set-string operatorIamIdentity=<anyscale_operator_client_id> \
---set-string workloadServiceAccountName=anyscale-operator \
---namespace anyscale-operator \
---create-namespace \
--i
 ```
 
 The above will likely fail due to some updates still in progress. We need to fix the service account used by the anyscale operator.
