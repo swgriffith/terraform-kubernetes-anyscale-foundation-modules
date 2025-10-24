@@ -25,12 +25,50 @@ Steps for deploying Anyscale resources via Terraform:
 * Apply the terraform
 
 ```shell
+# Variables
+SUBSCRIPTION_ID=12345678-1234-1234-1234-123456789012
+RESOURCE_GROUP=Anyscale-Lab-RG
+LOCATION=northcentralus
+CLUSTER_NAME=anyscale-aks
+STORAGE_ACCOUNT_NAME=anyscale-$RANDOM
+STORAGE_CONTAINER_NAME=anyscale-container
+ANYSCALE_NAMESPACE=anyscale-operator
+ANYSCALE_CLOUD_INSTANCE_NAME=anyscale-cloud-instance
+
+# Generate a tfvars file using the variables above
+cat << EOF > values.tfvars
+# Required Variables
+# Your Azure subscription ID
+azure_subscription_id = "${SUBSCRIPTION_ID}"
+
+# Name of the resource group
+resource_group_name = "${RESOURCE_GROUP}"
+
+# Azure region where resources will be created
+azure_location = "${LOCATION}"
+
+# Name of the AKS cluster and related resources
+aks_cluster_name = "${CLUSTER_NAME}"
+
+# Storage Account Name
+storage_account_name = "${STORAGE_ACCOUNT_NAME}"
+
+# Storage Container Name
+storage_container_name = "${STORAGE_CONTAINER_NAME}"
+
+# Kubernetes namespace for the Anyscale operator
+anyscale_operator_namespace = "${ANYSCALE_NAMESPACE}"
+
+# GPU types for the node groups
+# Available options: T4, A10, A100, H100
+node_group_gpu_types = ["A10"]
+EOF
+
 terraform init
-terraform plan
-terraform apply
+terraform plan -var-file values.tfvars
+terraform apply -var-file values.tfvars
 ```
 
-If you are using a `tfvars` file, you will need to update the above commands accordingly.
 Note the output from Terraform which includes example cloud registration and helm commands you will use below.
 
 ### Install the Kubernetes Requirements
@@ -42,7 +80,7 @@ The Anyscale Operator requires the following components:
 **Note:** Ensure that you are authenticated to the AKS cluster for the remaining steps:
 
 ```shell
-az aks get-credentials --resource-group <azure_resource_group_name> --name <aks_cluster_name> --overwrite-existing
+az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
 ```
 
 #### Install the Nginx ingress controller
@@ -96,7 +134,7 @@ helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
 helm upgrade nvdp nvdp/nvidia-device-plugin \
   --namespace nvidia-device-plugin \
   --version 0.17.1 \
-  --values values_nvdp.yaml \
+  --values sample-values_nvdp.yaml \
   --create-namespace \
   --install
 ```
@@ -111,12 +149,12 @@ You will need an Anyscale platform API Key for the helm chart installation. You 
 
 ```shell
 anyscale cloud register \
-  --name <name> \
-  --region <region> \
+  --name $ANYSCALE_CLOUD_INSTANCE_NAME \
+  --region $LOCATION \
   --provider azure \
   --compute-stack k8s \
-  --cloud-storage-bucket-name 'azure://<blog-storage-name>' \
-  --cloud-storage-bucket-endpoint 'https://<storage-account>.blob.core.windows.net'
+  --cloud-storage-bucket-name 'azure://${STORAGE_CONTAINER_NAME}' \
+  --cloud-storage-bucket-endpoint 'https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net'
 ```
 
 2. Note the Cloud Deployment ID which will be used in the next step. The Anyscale CLI will return it as one of the outputs. Example:

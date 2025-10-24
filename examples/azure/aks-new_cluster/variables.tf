@@ -3,10 +3,28 @@ variable "azure_subscription_id" {
   type        = string
 }
 
+variable "resource_group_name" {
+  description = "(Optional) Name of the resource group."
+  type        = string
+  default     = "anyscale-lab-rg"
+}
+
 variable "azure_location" {
   description = "(Optional) Azure region for all resources."
   type        = string
   default     = "West US"
+}
+
+variable "storage_account_name" {
+  description = "(Optional) Name of the Azure Storage Account."
+  type        = string
+  default     = "anyscaleaksstorage"
+}
+
+variable "storage_container_name" {
+  description = "(Optional) Name of the Azure Storage Container."
+  type        = string
+  default     = "anyscaleaksstorage"
 }
 
 variable "tags" {
